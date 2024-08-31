@@ -1,4 +1,6 @@
-﻿namespace TalentTrail.Models
+﻿using TalentTrail.Enum;
+
+namespace TalentTrail.Models
 {
     public class JobPost
     {
