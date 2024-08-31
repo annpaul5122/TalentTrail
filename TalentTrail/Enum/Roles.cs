@@ -1,4 +1,4 @@
-﻿namespace TalentTrail.Models
+﻿namespace TalentTrail.Enum
 {
     public static class Roles
     {

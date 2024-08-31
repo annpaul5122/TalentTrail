@@ -1,6 +1,10 @@
 ﻿namespace TalentTrail.Enum
 {
-    public class JobPosition
+    public enum JobPosition
     {
+        HR,
+        Recruiter,
+        TalentAcquisitionManager,
+        HiringManager
     }
 }
