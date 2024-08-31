@@ -1,6 +1,12 @@
 ﻿namespace TalentTrail.Enum
 {
-    public class ApplicationStatus
+    public enum ApplicationStatus
     {
+        Applied,
+        InterviewScheduled,
+        OfferExtended,
+        Accepted,
+        Rejected,
+        Withdrawn
     }
 }
