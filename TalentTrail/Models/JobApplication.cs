@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using TalentTrail.Enum;
 
 namespace TalentTrail.Models
@@ -14,12 +15,8 @@ namespace TalentTrail.Models
         [Required]
         public int JobId { get; set; }
 
-        [Required]
-        [StringLength(255)]
-        public string ResumePath { get; set; }
-
         [StringLength(1000)]
-        public string CoverLetter { get; set; }
+        public string? CoverLetter { get; set; }
 
         [Required]
         public DateTime ApplicationDate { get; set; }

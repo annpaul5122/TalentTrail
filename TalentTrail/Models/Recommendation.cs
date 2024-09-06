@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TalentTrail.Models
 {
@@ -17,8 +18,8 @@ namespace TalentTrail.Models
         public DateTime CreatedAt { get; set; }
 
         //Relations
-        public JobSeeker JobSeeker { get; set; }
-        public JobPost JobPost { get; set; }
+        public JobSeeker? JobSeeker { get; set; }
+        public JobPost? JobPost { get; set; }
 
 
     }

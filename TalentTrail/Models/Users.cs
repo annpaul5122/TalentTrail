@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Text.Json.Serialization;
 using TalentTrail.Enum;
 
 namespace TalentTrail.Models
@@ -11,19 +12,20 @@ namespace TalentTrail.Models
 
         [Required]
         [MaxLength(50)]
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         [Required]
+        [EmailAddress]
         [MaxLength(50)]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Required]
-        [MinLength(8),MaxLength(25)]
-        public string Password { get; set; }
+        [MaxLength(255)]
+        public string? Password { get; set; }
 
         [Required]
         
@@ -33,12 +35,13 @@ namespace TalentTrail.Models
             get { return _role; }
             set
             {
-                if (value == Roles.Employer || value == Roles.JobSeeker)
+                if (value == Roles.Employer || value == Roles.JobSeeker || value == Roles.Admin)
                 {
                     _role = value;
                 }
                 else
                 {
+                    Console.WriteLine("Invalid role value provided: " + value);
                     throw new ArgumentException("Invalid role value.");
                 }
             }
@@ -48,8 +51,8 @@ namespace TalentTrail.Models
         public DateTime CreatedAt { get; set; }
 
         //Relations
-        public Employer Employer { get; set; }
-        public JobSeeker JobSeeker { get; set; }
+        public Employer? Employer { get; set; }
+        public JobSeeker? JobSeeker { get; set; }
 
 
     }

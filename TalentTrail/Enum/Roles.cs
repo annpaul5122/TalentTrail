@@ -4,5 +4,6 @@
     {
         public const string Employer = "Employer";
         public const string JobSeeker = "Job Seeker";
+        public const string Admin = "Admin";
     }
 }
