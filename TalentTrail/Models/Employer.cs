@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using TalentTrail.Enum;
 
 namespace TalentTrail.Models
@@ -15,27 +16,13 @@ namespace TalentTrail.Models
         public JobPosition JobPosition { get; set; }
 
         [Required]
-        [StringLength(255)]
-        public string CompanyName { get; set; }
+        public int CompanyId { get; set; }
 
-        [StringLength(255)]
-        public string CompanyWebUrl { get; set; }
 
-        [StringLength(1000)]
-        public string CompanyDescription { get; set; }
-
-        [StringLength(255)]
-        public string CompanyLogo {  get; set; }
-
-        [StringLength(255)]
-        public string CompanyAddress { get; set;}
-
-        [StringLength(255)]
-        [Required]
-        public string Industry { get; set; }
 
         //Relations
         public Users? Users { get; set; }
+        public CompanyDetails? CompanyDetails { get; set; }
         public ICollection<JobPost> Posts { get; set; }=new List<JobPost>();
 
 

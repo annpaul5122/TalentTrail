@@ -1,4 +1,10 @@
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+using TalentTrail.Models;
+using TalentTrail.Services;
+
 namespace TalentTrail
 {
     public class Program
@@ -9,11 +15,21 @@ namespace TalentTrail
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(x=>
+             x.JsonSerializerOptions.ReferenceHandler=ReferenceHandler.Preserve);
+
+            builder.Services.AddScoped<ISignUpService, SignUpService>();
+            builder.Services.AddScoped<IPasswordHasher<Users>, PasswordHasher<Users>>();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<TalentTrailDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("conStr")));
+
+
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
