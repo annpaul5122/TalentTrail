@@ -20,6 +20,7 @@ namespace TalentTrail
 
             builder.Services.AddScoped<ISignUpService, SignUpService>();
             builder.Services.AddScoped<IPasswordHasher<Users>, PasswordHasher<Users>>();
+            builder.Services.AddScoped<IEmployerProfileService, EmployerProfileService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
