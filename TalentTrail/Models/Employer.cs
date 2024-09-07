@@ -16,8 +16,9 @@ namespace TalentTrail.Models
         public JobPosition JobPosition { get; set; }
 
         [Required]
-        public int CompanyId { get; set; }
+        public bool IsThirdParty { get; set; }
 
+        public int? CompanyId { get; set; }
 
 
         //Relations
