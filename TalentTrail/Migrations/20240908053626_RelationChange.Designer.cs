@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TalentTrail.Models;
 
@@ -11,9 +12,11 @@ using TalentTrail.Models;
 namespace TalentTrail.Migrations
 {
     [DbContext(typeof(TalentTrailDbContext))]
-    partial class TalentTrailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240908053626_RelationChange")]
+    partial class RelationChange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -317,6 +320,9 @@ namespace TalentTrail.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("JobSeekerSeekerId")
+                        .HasColumnType("int");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -332,6 +338,8 @@ namespace TalentTrail.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
+
+                    b.HasIndex("JobSeekerSeekerId");
 
                     b.ToTable("Users");
                 });
@@ -387,7 +395,7 @@ namespace TalentTrail.Migrations
             modelBuilder.Entity("TalentTrail.Models.JobSeeker", b =>
                 {
                     b.HasOne("TalentTrail.Models.Users", "User")
-                        .WithOne("JobSeeker")
+                        .WithOne()
                         .HasForeignKey("TalentTrail.Models.JobSeeker", "UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -425,6 +433,15 @@ namespace TalentTrail.Migrations
                     b.Navigation("JobSeeker");
                 });
 
+            modelBuilder.Entity("TalentTrail.Models.Users", b =>
+                {
+                    b.HasOne("TalentTrail.Models.JobSeeker", "JobSeeker")
+                        .WithMany()
+                        .HasForeignKey("JobSeekerSeekerId");
+
+                    b.Navigation("JobSeeker");
+                });
+
             modelBuilder.Entity("TalentTrail.Models.CompanyDetails", b =>
                 {
                     b.Navigation("Employers");
@@ -454,8 +471,6 @@ namespace TalentTrail.Migrations
             modelBuilder.Entity("TalentTrail.Models.Users", b =>
                 {
                     b.Navigation("Employer");
-
-                    b.Navigation("JobSeeker");
                 });
 #pragma warning restore 612, 618
         }
