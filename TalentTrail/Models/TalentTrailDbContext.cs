@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TalentTrail.Models
 {
@@ -20,18 +21,32 @@ namespace TalentTrail.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // User - Employer
+            // Employer - User
             modelBuilder.Entity<Employer>()
                 .HasOne(e => e.Users)
                 .WithOne()
                 .HasForeignKey<Employer>(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // User - JobSeeker
+            // JobSeeker - User
             modelBuilder.Entity<JobSeeker>()
                 .HasOne(js => js.User)
                 .WithOne()
                 .HasForeignKey<JobSeeker>(js => js.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //User - Employer
+            modelBuilder.Entity<Users>()
+                .HasOne(u => u.Employer)
+                .WithOne(e => e.Users)
+                .HasForeignKey<Employer>(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //User - JobSeeker
+            modelBuilder.Entity<Users>()
+                .HasOne(u => u.JobSeeker)
+                .WithOne(j => j.User)
+                .HasForeignKey<JobSeeker>(j => j.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Company - Employer

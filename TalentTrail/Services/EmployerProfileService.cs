@@ -73,12 +73,23 @@ namespace TalentTrail.Services
 
         public async Task DeleteProfile(int employerId)
         {
-            var employer = await _dbContext.Employers.FindAsync(employerId);
+            var employer = await _dbContext.Employers
+                               .Include(e => e.Users)
+                               .FirstOrDefaultAsync(e => e.EmployerId == employerId);
+
             if (employer == null)
             {
                 throw new Exception("Employer not found.");
             }
+            var user = employer.Users;
+
             _dbContext.Employers.Remove(employer);
+
+            if (user != null)
+            {
+                _dbContext.Users.Remove(user); 
+            }
+
             await _dbContext.SaveChangesAsync();
         }
 
