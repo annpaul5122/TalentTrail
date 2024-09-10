@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TalentTrail.Dto;
+using TalentTrail.Enum;
 using TalentTrail.Models;
 using TalentTrail.Services;
 
@@ -100,6 +102,20 @@ namespace TalentTrail.Controllers
             catch (Exception ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("UpdateApplicationStatus")]
+        public async Task<IActionResult> UpdateApplicationStatus([FromBody] UpdateApplicationStatusDto updateDto)
+        {
+            try
+            {
+                await _jobPostService.UpdateApplicationStatus(updateDto.ApplicationId, updateDto.NewStatus);
+                return Ok("Application status updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
             }
         }
     }

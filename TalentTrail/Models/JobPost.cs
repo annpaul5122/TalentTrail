@@ -35,6 +35,9 @@ namespace TalentTrail.Models
         public EmploymentType EmploymentType { get; set; }
 
         [Required]
+        public string? Industry { get; set; }
+
+        [Required]
         public DateTime CreatedAt { get; set; }
 
         [Required]

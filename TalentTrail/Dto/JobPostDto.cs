@@ -12,6 +12,7 @@ namespace TalentTrail.Dto
         public string? JobLocation { get; set; }
         public string? SalaryRange { get; set; }
         public string EmploymentType { get; set; }
+        public string? Industry { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime ApplicationDeadline { get; set; }
         public DateTime? UpdatedAt { get; set; }
