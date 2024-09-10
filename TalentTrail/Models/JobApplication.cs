@@ -19,6 +19,10 @@ namespace TalentTrail.Models
         public string? CoverLetter { get; set; }
 
         [Required]
+        [StringLength(100)]
+        public string ResumePath { get; set; }
+
+        [Required]
         public DateTime ApplicationDate { get; set; }
 
         [Required]

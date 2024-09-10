@@ -5,10 +5,9 @@ namespace TalentTrail.Services
 {
     public interface IEmployerProfileService
     {
-        Task<Employer> CreateProfile (Employer employer,CompanyDetails companyDetails);
-        //Task<Employer> UpdateProfile (Employer employer);
-        Task DeleteProfile(int employerId);
-        Task<EmployerProfileDto> ViewProfile(int employerId);
+        public Task<Employer> CreateProfile (Employer employer,CompanyDetails companyDetails);
+        public Task DeleteProfile(int employerId);
+        public Task<EmployerProfileDto> ViewProfile(int employerId);
 
 
     }

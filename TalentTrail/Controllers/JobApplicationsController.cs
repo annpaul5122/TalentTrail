@@ -1,209 +1,104 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using TalentTrail.Models;
-using TalentTrail.Enum;
+using TalentTrail.Dto;
+using TalentTrail.Services;
 
 namespace TalentTrail.Controllers
 {
-    public class JobApplicationsController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class JobApplicationsController : ControllerBase
     {
-        private readonly TalentTrailDbContext _context;
-
-        public JobApplicationsController(TalentTrailDbContext context)
+        private readonly IJobApplicationService _jobApplicationService;
+        public JobApplicationsController(IJobApplicationService jobApplicationService)
         {
-            _context = context;
+            _jobApplicationService = jobApplicationService;
         }
 
-        // GET: JobApplications
-        public async Task<IActionResult> Index(string searchString, ApplicationStatus? statusFilter)
-        {
-            var talentTrailDbContext = _context.JobApplications
-                .Include(j => j.jobPost)
-                .Include(j => j.jobSeeker)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                talentTrailDbContext = talentTrailDbContext.Where(j => j.CoverLetter.Contains(searchString));
-            }
-
-            if (statusFilter.HasValue)
-            {
-                talentTrailDbContext = talentTrailDbContext.Where(j => j.ApplicationStatus == statusFilter.Value);
-            }
-
-            return View(await talentTrailDbContext.ToListAsync());
-        }
-
-        // GET: JobApplications/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var jobApplication = await _context.JobApplications
-                .Include(j => j.jobPost)
-                .Include(j => j.jobSeeker)
-                .FirstOrDefaultAsync(m => m.ApplicationId == id);
-            if (jobApplication == null)
-            {
-                return NotFound();
-            }
-
-            return View(jobApplication);
-        }
-
-        // GET: JobApplications/Create
-        public IActionResult Create()
-        {
-            ViewData["JobId"] = new SelectList(_context.JobPosts, "JobId", "JobDescription");
-            ViewData["SeekerId"] = new SelectList(_context.JobSeekers, "SeekerId", "Education");
-            ViewData["ApplicationStatuses"] = GetApplicationStatusSelectList();
-            return View();
-        }
-
-        // POST: JobApplications/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ApplicationId,SeekerId,JobId,CoverLetter,ApplicationDate,ApplicationStatus")] JobApplication jobApplication)
+        public async Task<IActionResult> CreateJobApplication([FromBody] ApplyJobDto applyJobDto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                if (jobApplication.ApplicationDate > DateTime.Now)
-                {
-                    ModelState.AddModelError(nameof(jobApplication.ApplicationDate), "Application date cannot be in the future.");
-                    return View(jobApplication);
-                }
-
-                _context.Add(jobApplication);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return BadRequest(ModelState);
             }
-            ViewData["JobId"] = new SelectList(_context.JobPosts, "JobId", "JobDescription", jobApplication.JobId);
-            ViewData["SeekerId"] = new SelectList(_context.JobSeekers, "SeekerId", "Education", jobApplication.SeekerId);
-            ViewData["ApplicationStatuses"] = GetApplicationStatusSelectList();
-            return View(jobApplication);
+
+            try
+            {
+                var jobApplication = await _jobApplicationService.CreateJobApplication(applyJobDto);
+                return Ok(new { message = "Job Application created successfully.", applicationId = jobApplication.ApplicationId });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // GET: JobApplications/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+   
+        [HttpGet("{applicationId}")]
+        public async Task<IActionResult> GetJobApplicationById(int applicationId)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                var jobApplicationDto = await _jobApplicationService.GetJobApplicationById(applicationId);
+                return Ok(jobApplicationDto);
             }
-
-            var jobApplication = await _context.JobApplications.FindAsync(id);
-            if (jobApplication == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return NotFound(new { message = ex.Message });
             }
-            ViewData["JobId"] = new SelectList(_context.JobPosts, "JobId", "JobDescription", jobApplication.JobId);
-            ViewData["SeekerId"] = new SelectList(_context.JobSeekers, "SeekerId", "Education", jobApplication.SeekerId);
-            ViewData["ApplicationStatuses"] = GetApplicationStatusSelectList();
-            return View(jobApplication);
         }
 
-        // POST: JobApplications/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ApplicationId,SeekerId,JobId,CoverLetter,ApplicationDate,ApplicationStatus")] JobApplication jobApplication)
+        [HttpGet("GetApplicationByJobSeeker/{seekerId}")]
+        public async Task<IActionResult> GetAllJobApplicationsByJobSeeker(int seekerId)
         {
-            if (id != jobApplication.ApplicationId)
+            try
             {
-                return NotFound();
+                var jobApplicationDtos = await _jobApplicationService.GetAllJobApplicationsByJobSeeker(seekerId);
+                return Ok(jobApplicationDtos);
             }
-
-            if (ModelState.IsValid)
+            catch (Exception ex)
             {
-                if (jobApplication.ApplicationDate > DateTime.Now)
-                {
-                    ModelState.AddModelError(nameof(jobApplication.ApplicationDate), "Application date cannot be in the future.");
-                    return View(jobApplication);
-                }
-
-                try
-                {
-                    _context.Update(jobApplication);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!JobApplicationExists(jobApplication.ApplicationId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                return BadRequest(new { message = ex.Message });
             }
-            ViewData["JobId"] = new SelectList(_context.JobPosts, "JobId", "JobDescription", jobApplication.JobId);
-            ViewData["SeekerId"] = new SelectList(_context.JobSeekers, "SeekerId", "Education", jobApplication.SeekerId);
-            ViewData["ApplicationStatuses"] = GetApplicationStatusSelectList();
-            return View(jobApplication);
         }
 
-        // GET: JobApplications/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteJobApplication(int id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                await _jobApplicationService.DeleteJobApplication(id);
+                return NoContent();
             }
-
-            var jobApplication = await _context.JobApplications
-                .Include(j => j.jobPost)
-                .Include(j => j.jobSeeker)
-                .FirstOrDefaultAsync(m => m.ApplicationId == id);
-            if (jobApplication == null)
+            catch (ArgumentException ex)
             {
-                return NotFound();
+                return NotFound(new { message = ex.Message });
             }
-
-            return View(jobApplication);
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // POST: JobApplications/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateJobApplication([FromBody] ApplyJobDto applyJobDto)
         {
-            var jobApplication = await _context.JobApplications.FindAsync(id);
-            if (jobApplication != null)
+            if (!ModelState.IsValid)
             {
-                _context.JobApplications.Remove(jobApplication);
+                return BadRequest(ModelState);
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool JobApplicationExists(int id)
-        {
-            return _context.JobApplications.Any(e => e.ApplicationId == id);
-        }
-
-        private List<SelectListItem> GetApplicationStatusSelectList()
-        {
-            return new List<SelectListItem>
+            try
             {
-                new SelectListItem { Value = ApplicationStatus.Applied.ToString(), Text = ApplicationStatus.Applied.ToString() },
-                new SelectListItem { Value = ApplicationStatus.InterviewScheduled.ToString(), Text = ApplicationStatus.InterviewScheduled.ToString() },
-                new SelectListItem { Value = ApplicationStatus.OfferExtended.ToString(), Text = ApplicationStatus.OfferExtended.ToString() },
-                new SelectListItem { Value = ApplicationStatus.Accepted.ToString(), Text = ApplicationStatus.Accepted.ToString() },
-                new SelectListItem { Value = ApplicationStatus.Rejected.ToString(), Text = ApplicationStatus.Rejected.ToString() },
-                new SelectListItem { Value = ApplicationStatus.Withdrawn.ToString(), Text = ApplicationStatus.Withdrawn.ToString() }
-            };
+                await _jobApplicationService.UpdateJobApplication(applyJobDto);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

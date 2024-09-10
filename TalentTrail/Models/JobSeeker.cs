@@ -18,10 +18,6 @@ namespace TalentTrail.Models
         public string? ProfileSummary { get; set; }
 
         [Required]
-        [MaxLength(255)]
-        public string? ResumePath { get; set; }
-
-        [Required]
         [StringLength(255)]
         public string? Education { get; set; }
 

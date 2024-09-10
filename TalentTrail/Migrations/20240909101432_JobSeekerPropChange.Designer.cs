@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TalentTrail.Models;
 
@@ -11,9 +12,11 @@ using TalentTrail.Models;
 namespace TalentTrail.Migrations
 {
     [DbContext(typeof(TalentTrailDbContext))]
-    partial class TalentTrailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240909101432_JobSeekerPropChange")]
+    partial class JobSeekerPropChange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,11 +114,6 @@ namespace TalentTrail.Migrations
 
                     b.Property<int>("JobId")
                         .HasColumnType("int");
-
-                    b.Property<string>("ResumePath")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("SeekerId")
                         .HasColumnType("int");

@@ -3,7 +3,8 @@ using TalentTrail.Models;
 
 public interface IJobSeekerService
 {
-    Task<JobSeeker> CreateProfile(JobSeeker jobSeeker);
-    Task<JobSeekerProfileDto> ViewProfile(int seekerId);
-    Task DeleteProfile(int seekerId);
+    public Task<JobSeeker> CreateProfile(JobSeeker jobSeeker, List<string> resumePaths);
+    public Task<JobSeekerProfileDto> ViewProfile(int seekerId);
+    public Task DeleteProfile(int seekerId);
+    public Task<List<JobPostDto>> SearchJobPosts(string? industry, string? jobTitle, string? jobLocation);
 }

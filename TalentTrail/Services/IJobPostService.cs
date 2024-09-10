@@ -1,15 +1,20 @@
 ﻿using TalentTrail.Dto;
+using TalentTrail.Enum;
 using TalentTrail.Models;
 
 namespace TalentTrail.Services
 {
     public interface IJobPostService
     {
-        Task<JobPost> CreateJobPost(JobPost jobPost);
-        Task<JobPost> UpdateJobPost(int jobId, JobPost updatedJobPost);
-        Task<JobPostDto> GetJobPostById(int jobId);
-        Task<List<JobPostDto>> GetAllJobPosts(); 
-        Task<List<JobPostDto>> GetJobPostsByEmployerId(int employerId);
-        Task DeleteJobPost(int jobId);
+        public Task<JobPost> CreateJobPost(JobPost jobPost);
+        public Task<JobPost> UpdateJobPost(int jobId, JobPost updatedJobPost);
+        public Task<JobPostDto> GetJobPostById(int jobId);
+        public Task<List<JobPostDto>> GetAllJobPosts(); 
+        public Task<List<JobPostDto>> GetJobPostsByEmployerId(int employerId);
+        public Task DeleteJobPost(int jobId);
+        public Task UpdateApplicationStatus(int applicationId, ApplicationStatus newStatus);
+
+
+
     }
 }

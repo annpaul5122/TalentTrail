@@ -1,190 +1,77 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TalentTrail.Models;
+using TalentTrail.Services;
 
 namespace TalentTrail.Controllers
 {
-    public class ResumesController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ResumesController : ControllerBase
     {
-        private readonly TalentTrailDbContext _context;
-        private readonly string _resumeUploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "resumes");
+        private readonly IResumeService _resumeService;
 
-        public ResumesController(TalentTrailDbContext context)
+        public ResumesController(IResumeService resumeService)
         {
-            _context = context;
+            _resumeService = resumeService;
         }
 
-        // GET: Resumes
-        public async Task<IActionResult> Index()
-        {
-            var talentTrailDbContext = _context.Resumes.Include(r => r.JobSeeker);
-            return View(await talentTrailDbContext.ToListAsync());
-        }
-
-        // GET: Resumes/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var resume = await _context.Resumes
-                .Include(r => r.JobSeeker)
-                .FirstOrDefaultAsync(m => m.ResumeId == id);
-            if (resume == null)
-            {
-                return NotFound();
-            }
-
-            return View(resume);
-        }
-
-        // GET: Resumes/Create
-        public IActionResult Create()
-        {
-            ViewData["SeekerId"] = new SelectList(_context.JobSeekers, "SeekerId", "Education");
-            return View();
-        }
-
-        // POST: Resumes/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(IFormFile resumeFile, [Bind("ResumeId,SeekerId,IsDefault,CreatedAt,UpdatedAt")] Resume resume)
+        public async Task<IActionResult> CreateResume([FromBody] Resume resume)
         {
-            if (ModelState.IsValid)
+            try
             {
-                if (resumeFile != null && resumeFile.Length > 0)
-                {
-                    var filePath = Path.Combine(_resumeUploadPath, Path.GetFileName(resumeFile.FileName));
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await resumeFile.CopyToAsync(stream);
-                    }
-                    resume.ResumePath = filePath;
-                }
-
-                resume.CreatedAt = DateTime.UtcNow;
-                resume.UpdatedAt = DateTime.UtcNow;
-
-                _context.Add(resume);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var createdResume = await _resumeService.CreateResume(resume);
+                return Ok(new { message = "Resume uploaded successfully.", resumeId = createdResume.ResumeId });
             }
-            ViewData["SeekerId"] = new SelectList(_context.JobSeekers, "SeekerId", "Education", resume.SeekerId);
-            return View(resume);
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // GET: Resumes/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        [HttpGet("{seekerId}")]
+        public async Task<IActionResult> GetAllResumes(int seekerId)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                var resumes = await _resumeService.GetAllResumesOfJobSeeker(seekerId);
+                return Ok(resumes);
             }
-
-            var resume = await _context.Resumes.FindAsync(id);
-            if (resume == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return NotFound(new { message = ex.Message });
             }
-            ViewData["SeekerId"] = new SelectList(_context.JobSeekers, "SeekerId", "Education", resume.SeekerId);
-            return View(resume);
         }
 
-        // POST: Resumes/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, IFormFile resumeFile, [Bind("ResumeId,SeekerId,ResumePath,IsDefault,CreatedAt,UpdatedAt")] Resume resume)
+        [HttpPut]
+        public async Task<IActionResult> UpdateResumePath([FromBody] Resume resume)
         {
-            if (id != resume.ResumeId)
+            try
             {
-                return NotFound();
+                var updatedResume = await _resumeService.UpdateResumePath(resume);
+                return Ok(updatedResume);
             }
-
-            if (ModelState.IsValid)
+            catch (Exception ex)
             {
-                try
-                {
-                    if (resumeFile != null && resumeFile.Length > 0)
-                    {
-                        var filePath = Path.Combine(_resumeUploadPath, Path.GetFileName(resumeFile.FileName));
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await resumeFile.CopyToAsync(stream);
-                        }
-                        resume.ResumePath = filePath;
-                    }
-
-                    resume.UpdatedAt = DateTime.UtcNow;
-                    _context.Update(resume);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ResumeExists(resume.ResumeId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                return NotFound(new { message = ex.Message });
             }
-            ViewData["SeekerId"] = new SelectList(_context.JobSeekers, "SeekerId", "Education", resume.SeekerId);
-            return View(resume);
         }
 
-        // GET: Resumes/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [HttpDelete("{resumeId}")]
+        public async Task<IActionResult> DeleteResume(int resumeId)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                await _resumeService.DeleteResume(resumeId);
+                return NoContent();
             }
-
-            var resume = await _context.Resumes
-                .Include(r => r.JobSeeker)
-                .FirstOrDefaultAsync(m => m.ResumeId == id);
-            if (resume == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return NotFound(new { message = ex.Message });
             }
-
-            return View(resume);
-        }
-
-        // POST: Resumes/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var resume = await _context.Resumes.FindAsync(id);
-            if (resume != null)
-            {
-                _context.Resumes.Remove(resume);
-                if (!string.IsNullOrEmpty(resume.ResumePath))
-                {
-                    System.IO.File.Delete(resume.ResumePath);
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool ResumeExists(int id)
-        {
-            return _context.Resumes.Any(e => e.ResumeId == id);
         }
     }
 }

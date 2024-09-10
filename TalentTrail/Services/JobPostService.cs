@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TalentTrail.Dto;
+using TalentTrail.Enum;
 using TalentTrail.Models;
 
 namespace TalentTrail.Services
@@ -35,6 +36,7 @@ namespace TalentTrail.Services
             jobPost.JobLocation = updatedJobPost.JobLocation;
             jobPost.SalaryRange = updatedJobPost.SalaryRange;
             jobPost.EmploymentType = updatedJobPost.EmploymentType;
+            jobPost.Industry = updatedJobPost.Industry;
             jobPost.ApplicationDeadline = updatedJobPost.ApplicationDeadline;
             jobPost.UpdatedAt = DateTime.Now;
 
@@ -65,6 +67,7 @@ namespace TalentTrail.Services
                 JobLocation = jobPost.JobLocation,
                 SalaryRange = jobPost.SalaryRange,
                 EmploymentType = jobPost.EmploymentType.ToString(),
+                Industry = jobPost.Industry,
                 CreatedAt = jobPost.CreatedAt,
                 ApplicationDeadline = jobPost.ApplicationDeadline,
                 UpdatedAt = jobPost.UpdatedAt
@@ -87,6 +90,7 @@ namespace TalentTrail.Services
                 JobLocation = j.JobLocation,
                 SalaryRange = j.SalaryRange,
                 EmploymentType = j.EmploymentType.ToString(),
+                Industry = j.Industry,
                 CreatedAt = j.CreatedAt,
                 ApplicationDeadline = j.ApplicationDeadline,
                 UpdatedAt = j.UpdatedAt
@@ -112,6 +116,7 @@ namespace TalentTrail.Services
                 JobLocation = j.JobLocation,
                 SalaryRange = j.SalaryRange,
                 EmploymentType = j.EmploymentType.ToString(),
+                Industry=j.Industry,
                 CreatedAt = j.CreatedAt,
                 ApplicationDeadline = j.ApplicationDeadline,
                 UpdatedAt = j.UpdatedAt
@@ -128,6 +133,22 @@ namespace TalentTrail.Services
             }
 
             _context.JobPosts.Remove(jobPost);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateApplicationStatus(int applicationId, ApplicationStatus newStatus)
+        {
+            var jobApplication = await _context.JobApplications
+                .FirstOrDefaultAsync(ja => ja.ApplicationId == applicationId);
+
+            if (jobApplication == null)
+            {
+                throw new Exception("Job Application not found.");
+            }
+
+            jobApplication.ApplicationStatus = newStatus;
+
+            _context.JobApplications.Update(jobApplication);
             await _context.SaveChangesAsync();
         }
     }

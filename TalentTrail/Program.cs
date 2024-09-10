@@ -23,6 +23,9 @@ namespace TalentTrail
             builder.Services.AddScoped<IEmployerProfileService, EmployerProfileService>();
             builder.Services.AddScoped<IJobPostService, JobPostService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IJobSeekerService, JobSeekerService>();
+            builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
+            builder.Services.AddScoped<IResumeService, ResumeService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
