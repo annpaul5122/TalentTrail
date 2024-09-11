@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TalentTrail.Dto;
 using TalentTrail.Enum;
@@ -18,6 +19,7 @@ namespace TalentTrail.Controllers
             _jobPostService = jobPostService;
         }
 
+        [Authorize(Roles = "Employer")]
         [HttpPost]
         public async Task<IActionResult> CreateJobPost([FromBody] JobPost jobPost)
         {
@@ -30,6 +32,7 @@ namespace TalentTrail.Controllers
             return Ok(new { message = "Job post created successfully.", jobId = createdJobPost.JobId });
         }
 
+        [Authorize(Roles = "Employer")]
         [HttpPut("{jobId}")]
         public async Task<IActionResult> UpdateJobPost(int jobId, [FromBody] JobPost jobPost)
         {
@@ -49,6 +52,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Employer,Job Seeker")]
         [HttpGet("jobId/{jobId}")]
         public async Task<IActionResult> GetJobPostById(int jobId)
         {
@@ -63,6 +67,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles ="Employer,Job Seeker,Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllJobPosts()
         {
@@ -70,6 +75,7 @@ namespace TalentTrail.Controllers
             return Ok(jobPosts);
         }
 
+        [Authorize(Roles = "Employer,Job Seeker")]
         [HttpGet("employerId/{employerId}")]
 
         public async Task<IActionResult> GetJobPostsByEmployerId(int employerId)
@@ -91,6 +97,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Employer")]
         [HttpDelete("{jobId}")]
         public async Task<IActionResult> DeleteJobPost(int jobId)
         {
@@ -105,6 +112,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Employer")]
         [HttpPost("UpdateApplicationStatus")]
         public async Task<IActionResult> UpdateApplicationStatus([FromBody] UpdateApplicationStatusDto updateDto)
         {

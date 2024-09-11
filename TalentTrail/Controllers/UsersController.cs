@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TalentTrail.Models;
 using TalentTrail.Services;
@@ -15,6 +16,7 @@ namespace TalentTrail.Controllers
             _userService = userService;
         }
 
+        [Authorize(Roles = "Employer,Job Seeker,Admin")]
         [HttpPost("{userId}/reset-password")]
         public async Task<IActionResult> ResetPassword(int userId, [FromBody] string newPassword)
         {
@@ -34,6 +36,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{userId}")]
 
         public async Task<IActionResult> DeleteUser(int userId)
@@ -49,6 +52,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Employer,Job Seeker,Admin")]
         [HttpPut("{userId}")]
 
         public async Task<IActionResult> UpdateUserDetails(int userId, [FromBody] Users updatedUser)
