@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace TalentTrail.Controllers
             _resumeService = resumeService;
         }
 
+        [Authorize(Roles = "Job Seeker")]
         [HttpPost]
         public async Task<IActionResult> CreateResume([FromBody] Resume resume)
         {
@@ -32,6 +34,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Job Seeker")]
         [HttpGet("{seekerId}")]
         public async Task<IActionResult> GetAllResumes(int seekerId)
         {
@@ -46,6 +49,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Job Seeker")]
         [HttpPut]
         public async Task<IActionResult> UpdateResumePath([FromBody] Resume resume)
         {
@@ -60,6 +64,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Job Seeker,Admin")]
         [HttpDelete("{resumeId}")]
         public async Task<IActionResult> DeleteResume(int resumeId)
         {

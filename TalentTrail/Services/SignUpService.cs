@@ -22,7 +22,6 @@ namespace TalentTrail.Services
                     throw new Exception("Email is already registered.");
                 }
 
-                // Hash the password before saving
                 user.Password = _passwordHasher.HashPassword(user, user.Password);
                 user.CreatedAt = DateTime.UtcNow;
 

@@ -29,7 +29,7 @@ namespace TalentTrail.Controllers
                     Email = userDto.Email,
                     Password = userDto.Password,
                     CreatedAt = DateTime.UtcNow,
-                    Role = Roles.Employer 
+                    Role = Roles.Employer
                 };
 
                 var registeredUser = await _signUpService.SignUpUserAsync(user);

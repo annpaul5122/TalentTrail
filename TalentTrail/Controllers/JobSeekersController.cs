@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TalentTrail.Dto;
@@ -16,6 +17,7 @@ namespace TalentTrail.Controllers
             _jobSeekerService = jobSeekerService;
         }
 
+        [Authorize(Roles = "Job Seeker")]
         [HttpPost("ProfileCreation")]
         public async Task<IActionResult> CreateProfile([FromBody] CreateJobSeekerProfileDto profileDto)
         {
@@ -34,6 +36,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Job Seeker")]
         [HttpDelete("{seekerId}")]
 
         public async Task<IActionResult> DeleteProfile(int seekerId)
@@ -49,6 +52,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Employer,Job Seeker,Admin")]
         [HttpGet("{seekerId}")]
         public async Task<IActionResult> ViewProfile(int seekerId)
         {
@@ -63,6 +67,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Job Seeker")]
         [HttpGet("search")]
         public async Task<IActionResult> SearchJobPosts([FromQuery] string? industry, [FromQuery] string? jobTitle, [FromQuery] string? jobLocation)
         {

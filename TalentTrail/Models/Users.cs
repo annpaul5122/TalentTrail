@@ -41,7 +41,7 @@ namespace TalentTrail.Models
                 }
                 else
                 {
-                    Console.WriteLine("Invalid role value provided: " + value);
+                    //Console.WriteLine("Invalid role value provided: " + value);
                     throw new ArgumentException("Invalid role value.");
                 }
             }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TalentTrail.Dto;
@@ -18,7 +19,7 @@ namespace TalentTrail.Controllers
             _profileService = profileService;
         }
 
-
+        [Authorize(Roles ="Employer")]
         [HttpPost]
         public async Task<IActionResult> CreateProfile([FromBody] EmployerCreateDto employerCreateDto)
         {
@@ -54,6 +55,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Employer,Job Seeker,Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> ViewProfile(int id)
         {
@@ -72,6 +74,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Employer")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProfile(int id)
         {
