@@ -24,19 +24,24 @@ namespace TalentTrail.Services
 
             if (jobSeeker == null)
             {
-                throw new Exception("Job Seeker not found.");
+                throw new ArgumentException("Job Seeker not found.");
             }
 
             var jobPost = await _dbContext.JobPosts.FindAsync(applyJobDto.jobId);
             if (jobPost == null)
             {
-                throw new Exception("Job Post not found.");
+                throw new ArgumentException("Job Post not found.");
+            }
+
+            if(jobPost.ApplicationDeadline < DateTime.UtcNow.Date)
+            {
+                throw new ArgumentException("Cannot apply for the job post.");
             }
 
             var resume = jobSeeker.Resumes.FirstOrDefault(r => r.ResumeId == applyJobDto.resumeId);
             if (resume == null)
             {
-                throw new Exception("Resume not found or does not belong to the job seeker.");
+                throw new ArgumentException("Resume not found or does not belong to the job seeker.");
             }
 
             var jobApplication = new JobApplication
@@ -45,7 +50,7 @@ namespace TalentTrail.Services
                 JobId = applyJobDto.jobId,
                 CoverLetter = applyJobDto.coverLetter,
                 ResumePath = resume.ResumePath,
-                ApplicationDate = DateTime.UtcNow,
+                ApplicationDate = DateTime.UtcNow.Date,
                 ApplicationStatus = ApplicationStatus.Applied
             };
 
@@ -64,7 +69,7 @@ namespace TalentTrail.Services
 
             if(application == null)
             {
-                throw new Exception("Job Application not found.");
+                throw new ArgumentException("Job Application not found.");
             }
 
             var applicationDto = new JobApplicationDto()
@@ -74,7 +79,7 @@ namespace TalentTrail.Services
                 JobId = application.JobId,
                 CoverLetter = application.CoverLetter,
                 ResumePath = application.ResumePath,
-                ApplicationDate = application.ApplicationDate,
+                ApplicationDate = application.ApplicationDate.Date,
                 ApplicationStatus = application.ApplicationStatus.ToString()
             };
 
@@ -96,7 +101,7 @@ namespace TalentTrail.Services
                 JobId = ja.JobId,
                 CoverLetter = ja.CoverLetter,
                 ResumePath = ja.ResumePath,
-                ApplicationDate = ja.ApplicationDate,
+                ApplicationDate = ja.ApplicationDate.Date,
                 ApplicationStatus = ja.ApplicationStatus.ToString()
             }).ToList();
 
@@ -122,7 +127,7 @@ namespace TalentTrail.Services
 
             if (jobApplication == null)
             {
-                throw new Exception("Job Application not found.");
+                throw new ArgumentException("Job Application not found.");
             }
 
             var resume = await _dbContext.Resumes
@@ -130,11 +135,11 @@ namespace TalentTrail.Services
 
             if (resume == null)
             {
-                throw new Exception("Invalid Resume ID.");
+                throw new ArgumentException("Invalid Resume ID.");
             }
 
             jobApplication.CoverLetter = applyJobDto.coverLetter;
-            jobApplication.ApplicationDate = DateTime.UtcNow; 
+            jobApplication.ApplicationDate = DateTime.UtcNow.Date; 
             jobApplication.ResumePath = resume.ResumePath;
 
             _dbContext.JobApplications.Update(jobApplication);

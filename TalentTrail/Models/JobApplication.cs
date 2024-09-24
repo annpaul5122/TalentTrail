@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using TalentTrail.Enum;
 
@@ -23,6 +24,7 @@ namespace TalentTrail.Models
         public string ResumePath { get; set; }
 
         [Required]
+        [Column(TypeName = "date")]
         public DateTime ApplicationDate { get; set; }
 
         [Required]

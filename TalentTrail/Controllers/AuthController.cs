@@ -17,12 +17,10 @@ namespace TalentTrail.Controllers
     {
         IConfiguration _config;
         private readonly TalentTrailDbContext _con;
-        private readonly IPasswordHasher<Users> _passwordHasher;
-        public AuthController(IConfiguration configuration, TalentTrailDbContext conn, IPasswordHasher<Users> passwordHasher)
+        public AuthController(IConfiguration configuration, TalentTrailDbContext conn)
         {
             this._config = configuration;
             _con = conn;
-            _passwordHasher = passwordHasher;
         }
 
         [NonAction]
@@ -32,29 +30,28 @@ namespace TalentTrail.Controllers
 
             if (user == null)
             {
-                throw new Exception("User not found with the provided email.");
+                throw new ArgumentException("User not found with the provided email.");
             }
 
-            var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, password);
 
-            if (passwordVerificationResult == PasswordVerificationResult.Success)
+            if (user.Password == password)
             {
                 return user; 
             }
             else
             {
-                throw new Exception("Invalid password.");
+                throw new ArgumentException("Invalid password.");
             }
         }
 
 
         [AllowAnonymous]
         [HttpPost]
-        public IActionResult UserAuth(string Email, string Password)
+        public IActionResult UserAuth([FromBody] LoginRequestDto loginRequest)
         {
             IActionResult response = Unauthorized();
 
-            var s = Validate(Email,Password);
+            var s = Validate(loginRequest.Email,loginRequest.Password);
             if (s != null)
             {
 
@@ -67,6 +64,8 @@ namespace TalentTrail.Controllers
 
                 var subject = new ClaimsIdentity(new[]
                     {
+                    new Claim(ClaimTypes.NameIdentifier, s.UserId.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Sub,s.FirstName),
                     new Claim(JwtRegisteredClaimNames.Email,s.Email),
                     new Claim(ClaimTypes.Role, s.Role) // Assign role to the token
                     });
@@ -90,6 +89,13 @@ namespace TalentTrail.Controllers
             }
             return response;
         }
+
+        public class LoginRequestDto
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+        }
+
     }
 
 }

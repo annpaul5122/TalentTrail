@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TalentTrail.Models;
 
@@ -11,9 +12,11 @@ using TalentTrail.Models;
 namespace TalentTrail.Migrations
 {
     [DbContext(typeof(TalentTrailDbContext))]
-    partial class TalentTrailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240921143105_Education")]
+    partial class Education
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -273,6 +276,10 @@ namespace TalentTrail.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("ProfilePicturePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ProfileSummary")
                         .HasMaxLength(1000)

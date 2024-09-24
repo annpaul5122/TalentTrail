@@ -15,6 +15,7 @@ namespace TalentTrail.Controllers
         public SignUpController(ISignUpService signUpService)
         {
             _signUpService = signUpService;
+
         }
 
         [HttpPost("signup/employer")]

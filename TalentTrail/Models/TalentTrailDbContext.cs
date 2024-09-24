@@ -18,6 +18,8 @@ namespace TalentTrail.Models
         public DbSet<Recommendation> Recommendations { get; set; }
         public DbSet<Resume> Resumes { get; set; }
         public DbSet<CompanyDetails> CompanyDetails { get; set; }
+        public DbSet<Education> Educations { get; set; }
+        public DbSet<Certification> Certifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -96,6 +98,20 @@ namespace TalentTrail.Models
                 .HasOne(r => r.JobPost)
                 .WithMany(jp => jp.Recommendations)
                 .HasForeignKey(r => r.JobId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // JobSeeker - Education
+            modelBuilder.Entity<Education>()
+                .HasOne(e => e.JobSeeker)
+                .WithMany(js => js.Educations)
+                .HasForeignKey(e => e.SeekerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // JobSeeker - Certification
+            modelBuilder.Entity<Certification>()
+                .HasOne(c => c.JobSeeker)
+                .WithMany(js => js.Certifications)
+                .HasForeignKey(c => c.SeekerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
 

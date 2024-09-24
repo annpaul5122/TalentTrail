@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TalentTrail.Dto;
+using TalentTrail.Enum;
 using TalentTrail.Models;
 
 namespace TalentTrail.Controllers
@@ -17,13 +18,12 @@ namespace TalentTrail.Controllers
             _jobSeekerService = jobSeekerService;
         }
 
-        [Authorize(Roles = "Job Seeker")]
         [HttpPost("ProfileCreation")]
         public async Task<IActionResult> CreateProfile([FromBody] CreateJobSeekerProfileDto profileDto)
         {
             try
             {
-                var createdJobSeeker = await _jobSeekerService.CreateProfile(profileDto.JobSeeker,profileDto.ResumePaths);
+                var createdJobSeeker = await _jobSeekerService.CreateProfile(profileDto.JobSeeker,profileDto.ResumePaths,profileDto.Educations,profileDto.Certifications);
                 return Ok(createdJobSeeker);
             }
             catch (DbUpdateException dbEx)
@@ -67,13 +67,13 @@ namespace TalentTrail.Controllers
             }
         }
 
-        [Authorize(Roles = "Job Seeker")]
+       // [Authorize(Roles = "Job Seeker")]
         [HttpGet("search")]
-        public async Task<IActionResult> SearchJobPosts([FromQuery] string? industry, [FromQuery] string? jobTitle, [FromQuery] string? jobLocation)
+        public async Task<IActionResult> SearchJobPosts([FromQuery] string? industry, [FromQuery] string? jobTitle, [FromQuery] string? jobLocation, [FromQuery] EmploymentType? employmentType)
         {
             try
             {
-                var jobPosts = await _jobSeekerService.SearchJobPosts(industry,jobTitle,jobLocation);
+                var jobPosts = await _jobSeekerService.SearchJobPosts(industry,jobTitle,jobLocation,employmentType);
                 if (jobPosts == null || !jobPosts.Any())
                 {
                     return NotFound("No job posts found with the given criteria.");

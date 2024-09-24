@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TalentTrail.Models;
 
@@ -11,9 +12,11 @@ using TalentTrail.Models;
 namespace TalentTrail.Migrations
 {
     [DbContext(typeof(TalentTrailDbContext))]
-    partial class TalentTrailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240916173823_PasswordReset1")]
+    partial class PasswordReset1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,36 +24,6 @@ namespace TalentTrail.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("TalentTrail.Models.Certification", b =>
-                {
-                    b.Property<int>("CertificationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CertificationId"));
-
-                    b.Property<string>("CertificateImagePath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("CertificationName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime>("DateIssued")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("SeekerId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CertificationId");
-
-                    b.HasIndex("SeekerId");
-
-                    b.ToTable("Certifications");
-                });
 
             modelBuilder.Entity("TalentTrail.Models.CompanyDetails", b =>
                 {
@@ -89,37 +62,6 @@ namespace TalentTrail.Migrations
                     b.HasKey("CompanyId");
 
                     b.ToTable("CompanyDetails");
-                });
-
-            modelBuilder.Entity("TalentTrail.Models.Education", b =>
-                {
-                    b.Property<int>("EducationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EducationId"));
-
-                    b.Property<string>("Degree")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Institution")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("PassoutYear")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SeekerId")
-                        .HasColumnType("int");
-
-                    b.HasKey("EducationId");
-
-                    b.HasIndex("SeekerId");
-
-                    b.ToTable("Educations");
                 });
 
             modelBuilder.Entity("TalentTrail.Models.Employer", b =>
@@ -256,8 +198,17 @@ namespace TalentTrail.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SeekerId"));
 
+                    b.Property<string>("Certifications")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Education")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Experience")
                         .HasMaxLength(255)
@@ -398,28 +349,6 @@ namespace TalentTrail.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TalentTrail.Models.Certification", b =>
-                {
-                    b.HasOne("TalentTrail.Models.JobSeeker", "JobSeeker")
-                        .WithMany("Certifications")
-                        .HasForeignKey("SeekerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("JobSeeker");
-                });
-
-            modelBuilder.Entity("TalentTrail.Models.Education", b =>
-                {
-                    b.HasOne("TalentTrail.Models.JobSeeker", "JobSeeker")
-                        .WithMany("Educations")
-                        .HasForeignKey("SeekerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("JobSeeker");
-                });
-
             modelBuilder.Entity("TalentTrail.Models.Employer", b =>
                 {
                     b.HasOne("TalentTrail.Models.CompanyDetails", "CompanyDetails")
@@ -529,10 +458,6 @@ namespace TalentTrail.Migrations
             modelBuilder.Entity("TalentTrail.Models.JobSeeker", b =>
                 {
                     b.Navigation("Application");
-
-                    b.Navigation("Certifications");
-
-                    b.Navigation("Educations");
 
                     b.Navigation("Recommendations");
 

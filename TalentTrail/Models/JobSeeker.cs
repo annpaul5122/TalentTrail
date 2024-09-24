@@ -17,19 +17,12 @@ namespace TalentTrail.Models
         [MaxLength(1000)]
         public string? ProfileSummary { get; set; }
 
-        [Required]
-        [StringLength(255)]
-        public string? Education { get; set; }
-
         [StringLength(255)]
         public string? Experience { get; set; }
 
         [StringLength(255)]
         [Required]
         public string? Skills { get; set; }
-
-        [StringLength(255)]
-        public string? Certifications { get; set; }
 
         [StringLength(255)]
         public string? LanguagesKnown { get; set; }
@@ -40,9 +33,12 @@ namespace TalentTrail.Models
 
         //Relations
         public Users? User { get; set; }
+
         public ICollection<JobApplication> Application { get; set; }=new List<JobApplication>();
         public ICollection<Resume> Resumes { get; set; } =new List<Resume>();
         public ICollection<Recommendation> Recommendations { get; set; } = new List<Recommendation>();
+        public ICollection<Education> Educations { get; set; } = new List<Education>();
+        public ICollection<Certification> Certifications { get; set; } = new List<Certification>();
 
     }
 }

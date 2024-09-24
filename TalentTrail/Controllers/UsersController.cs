@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Crypto.Generators;
+using TalentTrail.Dto;
 using TalentTrail.Models;
 using TalentTrail.Services;
 
@@ -11,29 +14,27 @@ namespace TalentTrail.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        public UsersController(IUserService userService)
+        private readonly TalentTrailDbContext _dbContext;
+        public UsersController(IUserService userService, TalentTrailDbContext dbContext)
         {
             _userService = userService;
+            _dbContext = dbContext;
+
         }
 
-        [Authorize(Roles = "Employer,Job Seeker,Admin")]
-        [HttpPost("{userId}/reset-password")]
-        public async Task<IActionResult> ResetPassword(int userId, [FromBody] string newPassword)
+        // [Authorize(Roles = "Employer,Job Seeker,Admin")]
+        [HttpPost("request-password-reset")]
+        public async Task<IActionResult> RequestPasswordReset([FromQuery] int userId)
         {
-            if (string.IsNullOrWhiteSpace(newPassword))
-            {
-                return BadRequest("Password cannot be empty.");
-            }
+            await _userService.SendPasswordResetEmail(userId);
+            return Ok("Password reset email sent.");
+        }
 
-            try
-            {
-                await _userService.ResetPassword(userId, newPassword);
-                return Ok(new { message = "Password reset successfully." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(string token, [FromQuery] string newPassword)
+        {
+            await _userService.ResetPassword(token, newPassword);
+            return Ok("Password has been reset.");
         }
 
         [Authorize(Roles = "Admin")]
@@ -76,6 +77,26 @@ namespace TalentTrail.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [HttpGet("details/{userId}")]
+        public async Task<ActionResult<UserDto>> GetUserDetails(int userId)
+        {
+            var user = await _dbContext.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+
+            var userDto = new UserDto
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email
+            };
+
+            return Ok(userDto);
         }
     }
 }

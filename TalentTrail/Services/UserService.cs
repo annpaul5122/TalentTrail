@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Crypto.Generators;
 using TalentTrail.Models;
 
 namespace TalentTrail.Services
@@ -6,29 +8,57 @@ namespace TalentTrail.Services
     public class UserService : IUserService
     {
         private readonly TalentTrailDbContext _dbContext;
-        private readonly IPasswordHasher<Users> _passwordHasher;
-        public UserService(TalentTrailDbContext dbContext,IPasswordHasher<Users> passwordHasher)
+        private readonly IEmailService _emailService;
+        private readonly PasswordHasher<Users> _passwordHasher;
+
+        public UserService(TalentTrailDbContext dbContext, IEmailService emailService)
         {
             _dbContext = dbContext;
-            _passwordHasher = passwordHasher;
+            _emailService = emailService;
+            _passwordHasher = new PasswordHasher<Users>();
+
         }
 
-        public async Task ResetPassword(int userId,string newPassword)
+        public async Task SendPasswordResetEmail(int userId)
         {
             var user = await _dbContext.Users.FindAsync(userId);
-            if(user == null)
+            if (user == null)
             {
-                throw new Exception("User not found.");
+                throw new ArgumentException("User not found.");
             }
 
-            var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, newPassword);
-            if (passwordVerificationResult == PasswordVerificationResult.Success)
+            if (string.IsNullOrEmpty(user.Email))
             {
-                throw new Exception("New password cannot be the same as the old password.");
+                throw new InvalidOperationException("User email is not set.");
             }
 
-            user.Password = _passwordHasher.HashPassword(user, newPassword);
-            _dbContext.Users.Update(user);
+            // Generate token
+            var token = Guid.NewGuid().ToString();
+            user.PasswordResetToken = token;
+            user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1); // Token expires in 1 hour
+            await _dbContext.SaveChangesAsync();
+
+            // Send email
+            var resetLink = $"https://localhost:7119/api/Users/reset-password?token={token}"; // Adjust URL as needed
+            var subject = "Password Reset Request";
+            var body = $"Please reset your password by clicking on the following link: <a href='{resetLink}'>Reset Password</a>";
+
+            await _emailService.SendEmailAsync(user.Email, subject, body);
+        }
+
+        public async Task ResetPassword(string token, string newPassword)
+        {
+            var user = await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.PasswordResetToken == token && u.PasswordResetTokenExpiry > DateTime.UtcNow);
+
+            if (user == null)
+            {
+                throw new ArgumentException("Invalid or expired token.");
+            }
+
+            user.Password = _passwordHasher.HashPassword(user, newPassword); // Hash the new password
+            user.PasswordResetToken = null;
+            user.PasswordResetTokenExpiry = null;
             await _dbContext.SaveChangesAsync();
         }
 
@@ -37,7 +67,14 @@ namespace TalentTrail.Services
             var user = await _dbContext.Users.FindAsync(userId);
             if(user == null)
             {
-                throw new Exception("User not found.");
+                throw new ArgumentException("User not found.");
+            }
+
+            var jobSeeker = await _dbContext.JobSeekers.FirstOrDefaultAsync(js => js.UserId == userId);
+
+            if (jobSeeker != null)
+            {
+                _dbContext.JobSeekers.Remove(jobSeeker);
             }
 
             _dbContext.Users.Remove(user);
@@ -49,7 +86,7 @@ namespace TalentTrail.Services
             var user = await _dbContext.Users.FindAsync(users.UserId);
             if(user==null)
             {
-                throw new Exception("User not found");
+                throw new ArgumentException("User not found");
             }
             user.FirstName = users.FirstName;
             user.LastName = users.LastName;
