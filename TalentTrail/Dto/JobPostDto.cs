@@ -14,6 +14,8 @@ namespace TalentTrail.Dto
         public string EmploymentType { get; set; }
         public string? Industry { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        [DataType(DataType.Date)]
         public DateTime ApplicationDeadline { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }

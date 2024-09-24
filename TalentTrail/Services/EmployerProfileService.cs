@@ -7,9 +7,12 @@ namespace TalentTrail.Services
     public class EmployerProfileService : IEmployerProfileService
     {
         private readonly TalentTrailDbContext _dbContext;
-        public EmployerProfileService(TalentTrailDbContext dbContext)
+        private readonly IEmailService _emailService;
+        public EmployerProfileService(TalentTrailDbContext dbContext, IEmailService emailService)
         {
             _dbContext = dbContext;
+            _emailService = emailService;
+
         }
 
         public async Task<Employer> CreateProfile(Employer employer,CompanyDetails companyDetails)
@@ -17,7 +20,7 @@ namespace TalentTrail.Services
             var existingUser = await _dbContext.Users.FindAsync(employer.UserId);
             if (existingUser == null)
             {
-                throw new Exception("Invalid User ID.");
+                throw new ArgumentException("Invalid User ID.");
             }
 
             var existingCompany = await _dbContext.CompanyDetails
@@ -36,6 +39,18 @@ namespace TalentTrail.Services
             _dbContext.Employers.Add(employer);
             await _dbContext.SaveChangesAsync();
 
+            var subject = "Profile Creation - Talent Trail";
+            var body = $"Hello {existingUser.FirstName},\n\nYour profile as an employer has been created successfully.";
+
+            try
+            {
+                await _emailService.SendEmailAsync(existingUser.Email, subject, body);
+            }
+            catch (Exception)
+            {
+              
+            }
+
             return employer;
         }
 
@@ -48,7 +63,7 @@ namespace TalentTrail.Services
 
             if (employer == null)
             {
-                throw new Exception("Employer not found.");
+                throw new ArgumentException("Employer not found.");
             }
 
             var profileDto = new EmployerProfileDto
@@ -79,7 +94,7 @@ namespace TalentTrail.Services
 
             if (employer == null)
             {
-                throw new Exception("Employer not found.");
+                throw new ArgumentException("Employer not found.");
             }
             var user = employer.Users;
 

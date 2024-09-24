@@ -30,10 +30,12 @@ namespace TalentTrail
             builder.Services.AddScoped<IPasswordHasher<Users>, PasswordHasher<Users>>();
             builder.Services.AddScoped<IEmployerProfileService, EmployerProfileService>();
             builder.Services.AddScoped<IJobPostService, JobPostService>();
-            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IJobSeekerService, JobSeekerService>();
             builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
             builder.Services.AddScoped<IResumeService, ResumeService>();
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
@@ -67,6 +69,7 @@ namespace TalentTrail
                 new string[]{}
             }
         });
+                //opt.SchemaFilter<EnumSchemaFilter>();
             });
 
             // Configure JWT Authentication
@@ -90,12 +93,26 @@ namespace TalentTrail
                 };
             });
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder =>
+                    {
+                        builder
+                            .WithOrigins("http://localhost:3000") // Replace with your frontend URL
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials(); // Allow credentials (cookies, authorization headers)
+                    });
+            });
+
             builder.Services.AddDbContext<TalentTrailDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("conStr")));
 
 
             
             var app = builder.Build();
+            app.UseCors("AllowSpecificOrigin");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

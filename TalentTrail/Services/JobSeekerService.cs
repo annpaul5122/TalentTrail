@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TalentTrail.Dto;
+using TalentTrail.Enum;
 using TalentTrail.Models;
 
 namespace TalentTrail.Services
@@ -7,19 +8,23 @@ namespace TalentTrail.Services
     public class JobSeekerService : IJobSeekerService
     {
         private readonly TalentTrailDbContext _dbContext;
+        private readonly IEmailService _emailService;
 
-        public JobSeekerService(TalentTrailDbContext dbContext)
+        public JobSeekerService(TalentTrailDbContext dbContext, IEmailService emailService)
         {
             _dbContext = dbContext;
+            _emailService = emailService;
         }
 
-        public async Task<JobSeeker> CreateProfile(JobSeeker jobSeeker, List<string> resumePaths)
+        public async Task<JobSeeker> CreateProfile(JobSeeker jobSeeker, List<string> resumePaths, List<EducationDto> educations, List<CertificationDto> certifications)
         {
             var existingUser = await _dbContext.Users.FindAsync(jobSeeker.UserId);
             if (existingUser == null)
             {
-                throw new Exception("Invalid User ID.");
+                throw new ArgumentException("Invalid User ID.");
             }
+
+            jobSeeker.CreatedAt = DateTime.UtcNow;
 
             _dbContext.JobSeekers.Add(jobSeeker);
             await _dbContext.SaveChangesAsync();
@@ -35,7 +40,44 @@ namespace TalentTrail.Services
                 };
                 _dbContext.Resumes.Add(resume);
             }
+
+            foreach (var education in educations)
+            {
+                var edu = new Education
+                {
+                    Degree = education.Degree,
+                    Institution = education.Institution,
+                    PassoutYear = education.PassOutYear,
+                    SeekerId = jobSeeker.SeekerId
+                };
+                _dbContext.Educations.Add(edu);
+            }
+
+            foreach (var certification in certifications)
+            {
+                var cert = new Certification
+                {
+                    CertificationName = certification.CertificationName,
+                    CertificateImagePath = certification.CertificatePicturePath,
+                    DateIssued = certification.DateIssued,
+                    SeekerId = jobSeeker.SeekerId
+                };
+                _dbContext.Certifications.Add(cert);
+            }
+
             await _dbContext.SaveChangesAsync();
+
+            var subject = "Profile Creation - Talent Trail";
+            var body = $"Hello {existingUser.FirstName},\n\nYour profile as an job seeker has been created successfully.";
+
+            try
+            {
+                await _emailService.SendEmailAsync(existingUser.Email, subject, body);
+            }
+            catch (Exception)
+            {
+                
+            }
 
             return jobSeeker;
         }
@@ -46,12 +88,14 @@ namespace TalentTrail.Services
                 .Include(js => js.User)
                 .Include(js => js.Resumes)
                 .Include(js => js.Application)
+                .Include(js => js.Educations) 
+                .Include(js => js.Certifications)
                 .Include(js => js.Recommendations)
                 .FirstOrDefaultAsync(js => js.SeekerId == seekerId);
 
             if (jobSeeker == null)
             {
-                throw new Exception("Job Seeker not found.");
+                throw new ArgumentException("Job Seeker not found.");
             }
 
             var profileDto = new JobSeekerProfileDto
@@ -62,10 +106,20 @@ namespace TalentTrail.Services
                 PhoneNumber = jobSeeker.PhoneNumber,
                 ProfileSummary = jobSeeker.ProfileSummary,
                 ResumePath = jobSeeker.Resumes.Select(r => r.ResumePath).ToList(),
-                Education = jobSeeker.Education,
+                Educations = jobSeeker.Educations.Select(e => new EducationDto
+                {
+                    Degree = e.Degree,
+                    Institution = e.Institution,
+                    PassOutYear = e.PassoutYear
+                }).ToList(),
+                Certifications = jobSeeker.Certifications.Select(c => new CertificationDto
+                {
+                    CertificationName = c.CertificationName,
+                    CertificatePicturePath = c.CertificateImagePath,
+                    DateIssued = c.DateIssued
+                }).ToList(),
                 Experience = jobSeeker.Experience,
                 Skills = jobSeeker.Skills,
-                Certifications = jobSeeker.Certifications,
                 LanguagesKnown = jobSeeker.LanguagesKnown,
                 CreatedAt = jobSeeker.CreatedAt,
                 LastUpdatedAt = jobSeeker.LastUpdatedAt
@@ -80,13 +134,21 @@ namespace TalentTrail.Services
                 .Include(js => js.User)
                 .Include(js => js.Resumes)
                 .Include(js => js.Application)
+                .Include(js => js.Educations) 
+                .Include(js => js.Certifications)
                 .Include(js => js.Recommendations)
                 .FirstOrDefaultAsync(js => js.SeekerId == seekerId);
 
             if (jobSeeker == null)
             {
-                throw new Exception("Job Seeker not found.");
+                throw new ArgumentException("Job Seeker not found.");
             }
+
+            _dbContext.Resumes.RemoveRange(jobSeeker.Resumes);
+            _dbContext.JobApplications.RemoveRange(jobSeeker.Application);
+            _dbContext.Recommendations.RemoveRange(jobSeeker.Recommendations);
+            _dbContext.Educations.RemoveRange(jobSeeker.Educations);
+            _dbContext.Certifications.RemoveRange(jobSeeker.Certifications);
 
             _dbContext.JobSeekers.Remove(jobSeeker);
 
@@ -95,14 +157,10 @@ namespace TalentTrail.Services
                 _dbContext.Users.Remove(jobSeeker.User);
             }
 
-            _dbContext.Resumes.RemoveRange(jobSeeker.Resumes);
-            _dbContext.JobApplications.RemoveRange(jobSeeker.Application);
-            _dbContext.Recommendations.RemoveRange(jobSeeker.Recommendations);
-
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<List<JobPostDto>> SearchJobPosts(string? industry, string? jobTitle, string? jobLocation)
+        public async Task<List<JobPostDto>> SearchJobPosts(string? industry, string? jobTitle, string? jobLocation, EmploymentType? employmentType)
         {
             var query = _dbContext.JobPosts.AsQueryable();
 
@@ -119,6 +177,11 @@ namespace TalentTrail.Services
             if (!string.IsNullOrEmpty(jobLocation))
             {
                 query = query.Where(j => j.JobLocation.Contains(jobLocation));
+            }
+
+            if (employmentType.HasValue)
+            {
+                query = query.Where(j => j.EmploymentType == employmentType.Value);
             }
 
             var jobPosts = await query.Include(j => j.Employer)

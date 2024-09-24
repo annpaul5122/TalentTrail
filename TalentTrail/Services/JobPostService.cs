@@ -27,7 +27,7 @@ namespace TalentTrail.Services
 
             if (jobPost == null)
             {
-                throw new Exception("Job post not found.");
+                throw new ArgumentException("Job post not found.");
             }
 
             jobPost.JobTitle = updatedJobPost.JobTitle;
@@ -37,7 +37,7 @@ namespace TalentTrail.Services
             jobPost.SalaryRange = updatedJobPost.SalaryRange;
             jobPost.EmploymentType = updatedJobPost.EmploymentType;
             jobPost.Industry = updatedJobPost.Industry;
-            jobPost.ApplicationDeadline = updatedJobPost.ApplicationDeadline;
+            jobPost.ApplicationDeadline = updatedJobPost.ApplicationDeadline.Date;
             jobPost.UpdatedAt = DateTime.Now;
 
             _context.JobPosts.Update(jobPost);
@@ -55,7 +55,7 @@ namespace TalentTrail.Services
 
             if (jobPost == null)
             {
-                throw new Exception("Job post not found.");
+                throw new ArgumentException("Job post not found.");
             }
 
             var post = new JobPostDto()
@@ -69,7 +69,7 @@ namespace TalentTrail.Services
                 EmploymentType = jobPost.EmploymentType.ToString(),
                 Industry = jobPost.Industry,
                 CreatedAt = jobPost.CreatedAt,
-                ApplicationDeadline = jobPost.ApplicationDeadline,
+                ApplicationDeadline = jobPost.ApplicationDeadline.Date,
                 UpdatedAt = jobPost.UpdatedAt
             };
 
@@ -92,7 +92,7 @@ namespace TalentTrail.Services
                 EmploymentType = j.EmploymentType.ToString(),
                 Industry = j.Industry,
                 CreatedAt = j.CreatedAt,
-                ApplicationDeadline = j.ApplicationDeadline,
+                ApplicationDeadline = j.ApplicationDeadline.Date,
                 UpdatedAt = j.UpdatedAt
             }).ToList();
 
@@ -118,7 +118,7 @@ namespace TalentTrail.Services
                 EmploymentType = j.EmploymentType.ToString(),
                 Industry=j.Industry,
                 CreatedAt = j.CreatedAt,
-                ApplicationDeadline = j.ApplicationDeadline,
+                ApplicationDeadline = j.ApplicationDeadline.Date,
                 UpdatedAt = j.UpdatedAt
             }).ToList();
 
@@ -129,7 +129,7 @@ namespace TalentTrail.Services
             var jobPost = await _context.JobPosts.FindAsync(jobId);
             if (jobPost == null)
             {
-                throw new Exception("Job post not found.");
+                throw new ArgumentException("Job post not found.");
             }
 
             _context.JobPosts.Remove(jobPost);
@@ -143,7 +143,7 @@ namespace TalentTrail.Services
 
             if (jobApplication == null)
             {
-                throw new Exception("Job Application not found.");
+                throw new ArgumentException("Job Application not found.");
             }
 
             jobApplication.ApplicationStatus = newStatus;

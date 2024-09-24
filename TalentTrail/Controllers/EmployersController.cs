@@ -19,7 +19,6 @@ namespace TalentTrail.Controllers
             _profileService = profileService;
         }
 
-        [Authorize(Roles ="Employer")]
         [HttpPost]
         public async Task<IActionResult> CreateProfile([FromBody] EmployerCreateDto employerCreateDto)
         {

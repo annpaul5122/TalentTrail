@@ -50,6 +50,9 @@ namespace TalentTrail.Models
         [Required]
         public DateTime CreatedAt { get; set; }
 
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpiry { get; set; }
+
         //Relations
         public Employer? Employer { get; set; }
         public JobSeeker? JobSeeker { get; set; }

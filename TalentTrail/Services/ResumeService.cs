@@ -16,7 +16,7 @@ namespace TalentTrail.Services
             var jobSeeker = await _dbContext.JobSeekers.FindAsync(resume.SeekerId);
             if (jobSeeker == null)
             {
-                throw new Exception("Job Seeker not found.");
+                throw new ArgumentException("Job Seeker not found.");
             }
 
             resume.CreatedAt = DateTime.UtcNow;
@@ -34,7 +34,7 @@ namespace TalentTrail.Services
 
             if (resumes == null || !resumes.Any())
             {
-                throw new Exception("No resumes found for the given Job Seeker.");
+                throw new ArgumentException("No resumes found for the given Job Seeker.");
             }
 
             return resumes;
@@ -47,7 +47,7 @@ namespace TalentTrail.Services
 
             if (existingResume == null)
             {
-                throw new Exception("Resume not found.");
+                throw new ArgumentException("Resume not found.");
             }
 
             existingResume.ResumePath = resume.ResumePath;
@@ -64,7 +64,7 @@ namespace TalentTrail.Services
             var resume = await _dbContext.Resumes.FindAsync(resumeId);
             if (resume == null)
             {
-                throw new Exception("Resume not found.");
+                throw new ArgumentException("Resume not found.");
             }
 
             _dbContext.Resumes.Remove(resume);
