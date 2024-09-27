@@ -60,6 +60,7 @@ namespace TalentTrail.Services
 
             var post = new JobPostDto()
             {
+                JobId = jobId,
                 EmployerName = jobPost.Employer.Users.FirstName + " " + jobPost.Employer.Users.LastName,
                 JobTitle = jobPost.JobTitle,
                 JobDescription = jobPost.JobDescription,
@@ -83,6 +84,7 @@ namespace TalentTrail.Services
 
             var jobPostDtos = post.Select(j => new JobPostDto
             {
+                JobId = j.JobId,
                 EmployerName = j.Employer.Users.FirstName + " " + j.Employer.Users.LastName,
                 JobTitle = j.JobTitle,
                 JobDescription = j.JobDescription,
@@ -109,6 +111,7 @@ namespace TalentTrail.Services
 
             var jobPostDtos = jobPosts.Select(j => new JobPostDto
             {
+                JobId = j.JobId,
                 EmployerName = j.Employer.Users.FirstName + " " + j.Employer.Users.LastName,
                 JobTitle = j.JobTitle,
                 JobDescription = j.JobDescription,

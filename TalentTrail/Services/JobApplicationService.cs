@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TalentTrail.Dto;
 using TalentTrail.Enum;
 using TalentTrail.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TalentTrail.Services
 {
@@ -76,6 +77,7 @@ namespace TalentTrail.Services
             {
                 ApplicationId = applicationId,
                 SeekerName = application.jobSeeker.User.FirstName + " " + application.jobSeeker.User.LastName,
+                Email = application.jobSeeker.User.Email,
                 JobId = application.JobId,
                 CoverLetter = application.CoverLetter,
                 ResumePath = application.ResumePath,
@@ -85,6 +87,7 @@ namespace TalentTrail.Services
 
             return applicationDto;
         }
+
 
         public async Task<List<JobApplicationDto>> GetAllJobApplicationsByJobSeeker(int seekerId)
         {
@@ -98,6 +101,30 @@ namespace TalentTrail.Services
             {
                 ApplicationId = ja.ApplicationId,
                 SeekerName = ja.jobSeeker.User.FirstName + " " + ja.jobSeeker.User.LastName,
+                Email = ja.jobSeeker.User.Email,
+                JobId = ja.JobId,
+                CoverLetter = ja.CoverLetter,
+                ResumePath = ja.ResumePath,
+                ApplicationDate = ja.ApplicationDate.Date,
+                ApplicationStatus = ja.ApplicationStatus.ToString()
+            }).ToList();
+
+            return jobApplicationDtos;
+        }
+
+        public async Task<List<JobApplicationDto>> GetAllJobApplicationsByJobPosts(int jobId)
+        {
+            var jobApplications = await _dbContext.JobApplications
+               .Include(ja => ja.jobSeeker)
+               .Include(ja => ja.jobSeeker.User)
+               .Where(ja => ja.JobId==jobId)
+               .ToListAsync();
+
+            var jobApplicationDtos = jobApplications.Select(ja => new JobApplicationDto
+            {
+                ApplicationId = ja.ApplicationId,
+                SeekerName = ja.jobSeeker.User.FirstName + " " + ja.jobSeeker.User.LastName,
+                Email = ja.jobSeeker.User.Email,
                 JobId = ja.JobId,
                 CoverLetter = ja.CoverLetter,
                 ResumePath = ja.ResumePath,

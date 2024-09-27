@@ -8,6 +8,8 @@ namespace TalentTrail.Dto
     {
         public int ApplicationId { get; set; }
         public string? SeekerName { get; set; }
+
+        public string Email { get; set; }
         public int JobId { get; set; }
         public string? CoverLetter { get; set; }
         public string ResumePath { get; set; }

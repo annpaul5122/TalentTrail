@@ -16,7 +16,7 @@ namespace TalentTrail.Controllers
             _jobApplicationService = jobApplicationService;
         }
 
-        [Authorize(Roles = "Job Seeker")]
+       // [Authorize(Roles = "Job Seeker")]
         [HttpPost]
         public async Task<IActionResult> CreateJobApplication([FromBody] ApplyJobDto applyJobDto)
         {
@@ -36,7 +36,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-        [Authorize(Roles = "Employer,Job Seeker")]
+       // [Authorize(Roles = "Employer,Job Seeker")]
         [HttpGet("{applicationId}")]
         public async Task<IActionResult> GetJobApplicationById(int applicationId)
         {
@@ -51,7 +51,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-        [Authorize(Roles = "Employer,Job Seeker")]
+        //[Authorize(Roles = "Employer,Job Seeker")]
         [HttpGet("GetApplicationByJobSeeker/{seekerId}")]
         public async Task<IActionResult> GetAllJobApplicationsByJobSeeker(int seekerId)
         {
@@ -66,7 +66,21 @@ namespace TalentTrail.Controllers
             }
         }
 
-        [Authorize(Roles = "Employer,Job Seeker")]
+        [HttpGet("GetApplicationByJobPost/{jobId}")]
+        public async Task<IActionResult> GetAllJobApplicationsByJobPosts(int jobId)
+        {
+            try
+            {
+                var jobApplicationDtos = await _jobApplicationService.GetAllJobApplicationsByJobPosts(jobId);
+                return Ok(jobApplicationDtos);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+      //  [Authorize(Roles = "Employer,Job Seeker")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteJobApplication(int id)
         {
@@ -85,7 +99,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-        [Authorize(Roles = "Job Seeker")]
+       // [Authorize(Roles = "Job Seeker")]
         [HttpPut]
         public async Task<IActionResult> UpdateJobApplication([FromBody] ApplyJobDto applyJobDto)
         {
