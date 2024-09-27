@@ -69,11 +69,11 @@ namespace TalentTrail.Controllers
 
        // [Authorize(Roles = "Job Seeker")]
         [HttpGet("search")]
-        public async Task<IActionResult> SearchJobPosts([FromQuery] string? industry, [FromQuery] string? jobTitle, [FromQuery] string? jobLocation, [FromQuery] EmploymentType? employmentType)
+        public async Task<IActionResult> SearchJobPosts([FromQuery] string? jobTitle)
         {
             try
             {
-                var jobPosts = await _jobSeekerService.SearchJobPosts(industry,jobTitle,jobLocation,employmentType);
+                var jobPosts = await _jobSeekerService.SearchJobPosts(jobTitle);
                 if (jobPosts == null || !jobPosts.Any())
                 {
                     return NotFound("No job posts found with the given criteria.");

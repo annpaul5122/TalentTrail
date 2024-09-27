@@ -160,29 +160,16 @@ namespace TalentTrail.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<List<JobPostDto>> SearchJobPosts(string? industry, string? jobTitle, string? jobLocation, EmploymentType? employmentType)
+        public async Task<List<JobPostDto>> SearchJobPosts(string? jobTitle)
         {
             var query = _dbContext.JobPosts.AsQueryable();
 
-            if (!string.IsNullOrEmpty(industry))
-            {
-                query = query.Where(j => j.Industry == industry);
-            }
 
             if (!string.IsNullOrEmpty(jobTitle))
             {
                 query = query.Where(j => j.JobTitle.Contains(jobTitle));
             }
 
-            if (!string.IsNullOrEmpty(jobLocation))
-            {
-                query = query.Where(j => j.JobLocation.Contains(jobLocation));
-            }
-
-            if (employmentType.HasValue)
-            {
-                query = query.Where(j => j.EmploymentType == employmentType.Value);
-            }
 
             var jobPosts = await query.Include(j => j.Employer)
                               .Include(j => j.Employer.Users) 

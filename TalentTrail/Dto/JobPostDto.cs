@@ -5,6 +5,7 @@ namespace TalentTrail.Dto
 {
     public class JobPostDto
     {
+        public int JobId { get; set; }
         public string EmployerName { get; set; }
         public string? JobTitle { get; set; }
         public string? JobDescription { get; set; }
