@@ -85,5 +85,26 @@ namespace TalentTrail.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        // [Authorize(Roles = "Job Seeker")]
+        [HttpGet("filter")]
+        public async Task<IActionResult> JobPostFilter([FromQuery] string? jobTitle,[FromQuery] string? industry, [FromQuery] string? requirements, [FromQuery] string? location, [FromQuery] EmploymentType? employmentType)
+        {
+            try
+            {
+                var jobPosts = await _jobSeekerService.JobPostFilter(jobTitle,industry,requirements,location,employmentType);
+                if (jobPosts == null || !jobPosts.Any())
+                {
+                    return NotFound("No job posts found with the given criteria.");
+                }
+                return Ok(jobPosts);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+       
     }
 }

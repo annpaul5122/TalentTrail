@@ -177,6 +177,7 @@ namespace TalentTrail.Services
 
             return jobPosts.Select(j => new JobPostDto
             {
+                JobId=j.JobId,
                 EmployerName = j.Employer.Users.FirstName + " " + j.Employer.Users.LastName,
                 JobTitle = j.JobTitle,
                 JobDescription = j.JobDescription,
@@ -190,5 +191,60 @@ namespace TalentTrail.Services
                 UpdatedAt = j.UpdatedAt
             }).ToList();
         }
+
+        public async Task<List<JobPostDto>> JobPostFilter(string? jobTitle,string? industry,string? requirements,string? location,EmploymentType? employmentType)
+        {
+            var query = _dbContext.JobPosts.AsQueryable();
+
+            if (!string.IsNullOrEmpty(jobTitle))
+            {
+                query = query.Where(j => j.JobTitle.Contains(jobTitle));
+            }
+
+
+            if (!string.IsNullOrEmpty(industry))
+            {
+                query = query.Where(j => j.Industry.Contains(industry));
+            }
+
+            if (!string.IsNullOrEmpty(location))
+            {
+                query = query.Where(j => j.JobLocation.Equals(location));
+            }
+
+
+            if (employmentType.HasValue)
+            {
+                query = query.Where(j => j.EmploymentType == employmentType.Value);
+            }
+
+
+            if (!string.IsNullOrEmpty(requirements))
+            {
+                query = query.Where(j => j.JobRequirements.Contains(requirements));
+            }
+
+            var jobPosts = await query.Include(j => j.Employer)
+                              .Include(j => j.Employer.Users)
+                              .ToListAsync();
+
+            return jobPosts.Select(j => new JobPostDto
+            {
+                JobId = j.JobId,
+                EmployerName = j.Employer.Users.FirstName + " " + j.Employer.Users.LastName,
+                JobTitle = j.JobTitle,
+                JobDescription = j.JobDescription,
+                JobRequirements = j.JobRequirements,
+                JobLocation = j.JobLocation,
+                SalaryRange = j.SalaryRange,
+                EmploymentType = j.EmploymentType.ToString(),
+                Industry = j.Industry,
+                CreatedAt = j.CreatedAt,
+                ApplicationDeadline = j.ApplicationDeadline,
+                UpdatedAt = j.UpdatedAt
+            }).ToList();
+        }
+
+
     }
 }
