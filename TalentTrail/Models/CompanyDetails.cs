@@ -30,5 +30,6 @@ namespace TalentTrail.Models
 
         // Navigation property for Employers
         public ICollection<Employer> Employers { get; set; } = new List<Employer>();
+        public ICollection<JobPost> JobPosts { get; set; } = new List<JobPost>();
     }
 }

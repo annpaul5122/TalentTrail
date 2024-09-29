@@ -22,7 +22,6 @@ namespace TalentTrail.Controllers
 
         }
 
-        // [Authorize(Roles = "Employer,Job Seeker,Admin")]
         [HttpPost("request-password-reset")]
         public async Task<IActionResult> RequestPasswordReset([FromQuery] int userId)
         {

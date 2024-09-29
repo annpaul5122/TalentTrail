@@ -14,6 +14,10 @@ namespace TalentTrail.Models
         public int EmployerId { get; set; }
 
         [Required]
+
+        public int CompanyId { get; set; }
+
+        [Required]
         [StringLength(50)]
         public string? JobTitle { get; set; }
 
@@ -49,6 +53,7 @@ namespace TalentTrail.Models
 
         //Relations
         public Employer? Employer { get; set; }
+        public CompanyDetails? CompanyDetails { get; set; }
         public ICollection<JobApplication> JobApplications { get; set; }=new List<JobApplication>();
         public ICollection<Recommendation> Recommendations { get; set;} =new List<Recommendation>();
 

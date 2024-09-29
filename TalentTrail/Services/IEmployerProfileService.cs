@@ -9,6 +9,8 @@ namespace TalentTrail.Services
         public Task DeleteProfile(int employerId);
         public Task<EmployerProfileDto> ViewProfile(int employerId);
 
+        public Task<Employer> GetEmployerProfileByUserId(int userId);
+
 
     }
 }

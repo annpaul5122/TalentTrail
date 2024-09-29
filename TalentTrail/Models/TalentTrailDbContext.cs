@@ -114,6 +114,12 @@ namespace TalentTrail.Models
                 .HasForeignKey(c => c.SeekerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<JobPost>()
+               .HasOne(jp => jp.CompanyDetails)
+               .WithMany(cd => cd.JobPosts)
+               .HasForeignKey(jp => jp.CompanyId)
+               .OnDelete(DeleteBehavior.Restrict);
+
 
             base.OnModelCreating(modelBuilder);
         }

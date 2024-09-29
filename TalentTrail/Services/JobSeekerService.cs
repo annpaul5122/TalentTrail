@@ -173,12 +173,17 @@ namespace TalentTrail.Services
 
             var jobPosts = await query.Include(j => j.Employer)
                               .Include(j => j.Employer.Users) 
+                              .Include(j=>j.CompanyDetails)
                               .ToListAsync();
 
             return jobPosts.Select(j => new JobPostDto
             {
                 JobId=j.JobId,
                 EmployerName = j.Employer.Users.FirstName + " " + j.Employer.Users.LastName,
+                CompanyName = j.CompanyDetails.CompanyName,
+                CompanyDescription=j.CompanyDetails.CompanyDescription,
+                CompanyLogo=j.CompanyDetails.CompanyLogo,
+                CompanyWebUrl=j.CompanyDetails.CompanyWebUrl,
                 JobTitle = j.JobTitle,
                 JobDescription = j.JobDescription,
                 JobRequirements = j.JobRequirements,
@@ -226,12 +231,17 @@ namespace TalentTrail.Services
 
             var jobPosts = await query.Include(j => j.Employer)
                               .Include(j => j.Employer.Users)
+                              .Include(j=> j.CompanyDetails)
                               .ToListAsync();
 
             return jobPosts.Select(j => new JobPostDto
             {
                 JobId = j.JobId,
                 EmployerName = j.Employer.Users.FirstName + " " + j.Employer.Users.LastName,
+                CompanyName = j.CompanyDetails.CompanyName,
+                CompanyDescription = j.CompanyDetails.CompanyDescription,
+                CompanyLogo = j.CompanyDetails.CompanyLogo,
+                CompanyWebUrl = j.CompanyDetails.CompanyWebUrl,
                 JobTitle = j.JobTitle,
                 JobDescription = j.JobDescription,
                 JobRequirements = j.JobRequirements,
@@ -243,6 +253,22 @@ namespace TalentTrail.Services
                 ApplicationDeadline = j.ApplicationDeadline,
                 UpdatedAt = j.UpdatedAt
             }).ToList();
+        }
+
+
+        public async Task<JobSeeker> GetSeekerProfileByUserId(int userId)
+        {
+            return await _dbContext.JobSeekers.FirstOrDefaultAsync(e => e.UserId == userId);
+        }
+
+        public async Task<List<int>> GetAppliedJobsAsync(int seekerId)
+        {
+            var appliedJobs = await _dbContext.JobApplications
+                .Where(ja => ja.SeekerId == seekerId)
+                .Select(ja => ja.JobId)
+                .ToListAsync();
+
+            return appliedJobs;
         }
 
 

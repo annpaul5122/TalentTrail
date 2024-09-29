@@ -10,5 +10,6 @@ public interface IJobSeekerService
     public Task<List<JobPostDto>> SearchJobPosts(string? jobTitle);
     public Task<List<JobPostDto>> JobPostFilter(string? jobTitle,string? industry, string? requirements, string? location, EmploymentType? employmentType);
 
-
+    public Task<JobSeeker> GetSeekerProfileByUserId(int userId);
+    public Task<List<int>> GetAppliedJobsAsync(int seekerId);
 }
