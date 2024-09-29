@@ -30,6 +30,7 @@ namespace TalentTrail.Services
                 throw new ArgumentException("Job post not found.");
             }
 
+            jobPost.CompanyId = updatedJobPost.CompanyId;
             jobPost.JobTitle = updatedJobPost.JobTitle;
             jobPost.JobDescription = updatedJobPost.JobDescription;
             jobPost.JobRequirements = updatedJobPost.JobRequirements;
@@ -51,6 +52,7 @@ namespace TalentTrail.Services
             var jobPost = await _context.JobPosts
                 .Include(j => j.Employer)
                 .Include(j => j.Employer.Users)
+                .Include(j=>j.CompanyDetails)
                 .FirstOrDefaultAsync(j => j.JobId == jobId);
 
             if (jobPost == null)
@@ -62,6 +64,10 @@ namespace TalentTrail.Services
             {
                 JobId = jobId,
                 EmployerName = jobPost.Employer.Users.FirstName + " " + jobPost.Employer.Users.LastName,
+                CompanyName = jobPost.CompanyDetails.CompanyName,
+                CompanyDescription = jobPost.CompanyDetails.CompanyDescription,
+                CompanyLogo = jobPost.CompanyDetails.CompanyLogo,
+                CompanyWebUrl = jobPost.CompanyDetails.CompanyWebUrl,
                 JobTitle = jobPost.JobTitle,
                 JobDescription = jobPost.JobDescription,
                 JobRequirements = jobPost.JobRequirements,
@@ -80,12 +86,16 @@ namespace TalentTrail.Services
         public async Task<List<JobPostDto>> GetAllJobPosts()
         {
             var post= await _context.JobPosts.Include(j => j.Employer)
-                .Include(j=>j.Employer.Users).ToListAsync();
+                .Include(j=>j.Employer.Users).Include(j => j.CompanyDetails).ToListAsync();
 
             var jobPostDtos = post.Select(j => new JobPostDto
             {
                 JobId = j.JobId,
                 EmployerName = j.Employer.Users.FirstName + " " + j.Employer.Users.LastName,
+                CompanyName = j.CompanyDetails.CompanyName,
+                CompanyDescription = j.CompanyDetails.CompanyDescription,
+                CompanyLogo = j.CompanyDetails.CompanyLogo,
+                CompanyWebUrl = j.CompanyDetails.CompanyWebUrl,
                 JobTitle = j.JobTitle,
                 JobDescription = j.JobDescription,
                 JobRequirements = j.JobRequirements,
@@ -107,12 +117,17 @@ namespace TalentTrail.Services
                      .Where(j => j.EmployerId == employerId)
                      .Include(j => j.Employer)
                      .Include(j => j.Employer.Users)
+                     .Include(j => j.CompanyDetails)
                      .ToListAsync();
 
             var jobPostDtos = jobPosts.Select(j => new JobPostDto
             {
                 JobId = j.JobId,
                 EmployerName = j.Employer.Users.FirstName + " " + j.Employer.Users.LastName,
+                CompanyName = j.CompanyDetails.CompanyName,
+                CompanyDescription = j.CompanyDetails.CompanyDescription,
+                CompanyLogo = j.CompanyDetails.CompanyLogo,
+                CompanyWebUrl = j.CompanyDetails.CompanyWebUrl,
                 JobTitle = j.JobTitle,
                 JobDescription = j.JobDescription,
                 JobRequirements = j.JobRequirements,

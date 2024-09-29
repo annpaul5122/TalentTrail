@@ -105,6 +105,47 @@ namespace TalentTrail.Controllers
             }
         }
 
-       
+        [HttpGet("CheckProfile/{userId}")]
+        public async Task<IActionResult> CheckProfile(int userId)
+        {
+            try
+            {
+                var seeker = await _jobSeekerService.GetSeekerProfileByUserId(userId);
+
+                if (seeker != null)
+                {
+                    return Ok(new { exists = true, seekerId = seeker.SeekerId });
+                }
+                else
+                {
+                    return Ok(new { exists = false });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("appliedJobs")]
+        public async Task<IActionResult> GetAppliedJobs([FromQuery] int seekerId)
+        {
+            if (seekerId <= 0)
+            {
+                return BadRequest("Valid Job Seeker ID is required.");
+            }
+
+            try
+            {
+                var appliedJobIds = await _jobSeekerService.GetAppliedJobsAsync(seekerId);
+                return Ok(appliedJobIds);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+
     }
 }

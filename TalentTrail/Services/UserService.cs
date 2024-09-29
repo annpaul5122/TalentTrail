@@ -56,7 +56,7 @@ namespace TalentTrail.Services
                 throw new ArgumentException("Invalid or expired token.");
             }
 
-            user.Password = _passwordHasher.HashPassword(user, newPassword); // Hash the new password
+            user.Password = newPassword;
             user.PasswordResetToken = null;
             user.PasswordResetTokenExpiry = null;
             await _dbContext.SaveChangesAsync();

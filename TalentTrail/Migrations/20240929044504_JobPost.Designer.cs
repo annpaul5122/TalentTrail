@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TalentTrail.Models;
 
@@ -11,9 +12,11 @@ using TalentTrail.Models;
 namespace TalentTrail.Migrations
 {
     [DbContext(typeof(TalentTrailDbContext))]
-    partial class TalentTrailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240929044504_JobPost")]
+    partial class JobPost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -201,6 +204,9 @@ namespace TalentTrail.Migrations
                     b.Property<DateTime>("ApplicationDeadline")
                         .HasColumnType("date");
 
+                    b.Property<int?>("CompanyDetailsCompanyId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
@@ -246,7 +252,7 @@ namespace TalentTrail.Migrations
 
                     b.HasKey("JobId");
 
-                    b.HasIndex("CompanyId");
+                    b.HasIndex("CompanyDetailsCompanyId");
 
                     b.HasIndex("EmployerId");
 
@@ -465,10 +471,8 @@ namespace TalentTrail.Migrations
             modelBuilder.Entity("TalentTrail.Models.JobPost", b =>
                 {
                     b.HasOne("TalentTrail.Models.CompanyDetails", "CompanyDetails")
-                        .WithMany("JobPosts")
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .WithMany()
+                        .HasForeignKey("CompanyDetailsCompanyId");
 
                     b.HasOne("TalentTrail.Models.Employer", "Employer")
                         .WithMany("Posts")
@@ -525,8 +529,6 @@ namespace TalentTrail.Migrations
             modelBuilder.Entity("TalentTrail.Models.CompanyDetails", b =>
                 {
                     b.Navigation("Employers");
-
-                    b.Navigation("JobPosts");
                 });
 
             modelBuilder.Entity("TalentTrail.Models.Employer", b =>

@@ -87,5 +87,27 @@ namespace TalentTrail.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpGet("CheckProfile/{userId}")]
+        public async Task<IActionResult> CheckProfile(int userId)
+        {
+            try
+            {
+                var employer = await _profileService.GetEmployerProfileByUserId(userId);
+
+                if (employer != null)
+                {
+                    return Ok(new { exists = true, employerId = employer.EmployerId });
+                }
+                else
+                {
+                    return Ok(new { exists = false });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

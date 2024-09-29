@@ -34,7 +34,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-        [Authorize(Roles = "Job Seeker")]
+        //[Authorize(Roles = "Job Seeker")]
         [HttpGet("{seekerId}")]
         public async Task<IActionResult> GetAllResumes(int seekerId)
         {

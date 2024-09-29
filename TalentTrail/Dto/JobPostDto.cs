@@ -7,6 +7,10 @@ namespace TalentTrail.Dto
     {
         public int JobId { get; set; }
         public string EmployerName { get; set; }
+        public string CompanyName { get; set; }
+        public string? CompanyWebUrl { get; set; }
+        public string? CompanyDescription { get; set; }
+        public string? CompanyLogo { get; set; }
         public string? JobTitle { get; set; }
         public string? JobDescription { get; set; }
         public string? JobRequirements { get; set; }

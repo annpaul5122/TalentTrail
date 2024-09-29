@@ -108,6 +108,11 @@ namespace TalentTrail.Services
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task<Employer> GetEmployerProfileByUserId(int userId)
+        {
+            return await _dbContext.Employers.FirstOrDefaultAsync(e => e.UserId == userId);
+        }
+
 
     }
 }
