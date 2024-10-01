@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TalentTrail.Models;
@@ -15,6 +16,7 @@ namespace TalentTrail.Controllers
             _dbContext = dbContext;
         }
 
+        [Authorize(Roles = "Employer")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CompanyDetails>>> GetCompanyDetails()
         {

@@ -34,7 +34,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-        //[Authorize(Roles = "Job Seeker")]
+        [Authorize(Roles = "Job Seeker")]
         [HttpGet("{seekerId}")]
         public async Task<IActionResult> GetAllResumes(int seekerId)
         {
@@ -64,7 +64,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-        [Authorize(Roles = "Job Seeker,Admin")]
+        [Authorize(Roles = "Job Seeker")]
         [HttpDelete("{resumeId}")]
         public async Task<IActionResult> DeleteResume(int resumeId)
         {

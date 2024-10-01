@@ -8,9 +8,12 @@ namespace TalentTrail.Services
     public class JobPostService : IJobPostService
     {
         private readonly TalentTrailDbContext _context;
-        public JobPostService(TalentTrailDbContext context)
+        private readonly IEmailService _emailService;
+        public JobPostService(TalentTrailDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
+
         }
 
         public async Task<JobPost> CreateJobPost(JobPost jobPost)
@@ -157,6 +160,8 @@ namespace TalentTrail.Services
         public async Task UpdateApplicationStatus(int applicationId, ApplicationStatus newStatus)
         {
             var jobApplication = await _context.JobApplications
+                .Include(x => x.jobSeeker.User)
+                .Include(x=> x.jobPost)
                 .FirstOrDefaultAsync(ja => ja.ApplicationId == applicationId);
 
             if (jobApplication == null)
@@ -168,6 +173,18 @@ namespace TalentTrail.Services
 
             _context.JobApplications.Update(jobApplication);
             await _context.SaveChangesAsync();
+
+            var subject = "Application Status - Talent Trail";
+            var body = $"Hello {jobApplication.jobSeeker.User.FirstName},\n\nYour application for the job post {jobApplication.jobPost.JobTitle} has been viewed by the employer and the status has been changed to {newStatus.ToString()}.";
+
+            try
+            {
+                await _emailService.SendEmailAsync(jobApplication.jobSeeker.User.Email, subject, body);
+            }
+            catch (Exception)
+            {
+
+            }
         }
     }
 }

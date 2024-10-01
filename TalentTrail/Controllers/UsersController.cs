@@ -78,6 +78,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Employer,Job Seeker,Admin")]
         [HttpGet("details/{userId}")]
         public async Task<ActionResult<UserDto>> GetUserDetails(int userId)
         {

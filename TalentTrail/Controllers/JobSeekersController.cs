@@ -18,6 +18,7 @@ namespace TalentTrail.Controllers
             _jobSeekerService = jobSeekerService;
         }
 
+        [Authorize(Roles = "Job Seeker")]
         [HttpPost("ProfileCreation")]
         public async Task<IActionResult> CreateProfile([FromBody] CreateJobSeekerProfileDto profileDto)
         {
@@ -37,6 +38,52 @@ namespace TalentTrail.Controllers
         }
 
         [Authorize(Roles = "Job Seeker")]
+        [HttpPut("{seekerId}")]
+        public async Task<IActionResult> UpdateProfile(int seekerId, [FromBody] JobSeekerUpdateDto request)
+        {
+            if (request == null)
+            {
+                return BadRequest("Invalid request payload.");
+            }
+
+            try
+            {
+                var updatedJobSeeker = new JobSeeker
+                {
+                    User = new Users
+                    {
+                        FirstName = request.FirstName,
+                        LastName = request.LastName,
+                        Email = request.Email
+                    },
+                    PhoneNumber = request.PhoneNumber,
+                    ProfileSummary = request.ProfileSummary,
+                    Experience = request.Experience,
+                    Skills = request.Skills,
+                    LanguagesKnown = request.LanguagesKnown
+                };
+
+                var updatedJobSeekerProfile = await _jobSeekerService.UpdateProfile(
+                    seekerId,
+                    updatedJobSeeker,
+                    request.Educations,
+                    request.Certifications
+                );
+
+                return Ok(updatedJobSeekerProfile);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while updating the profile. Please try again later.");
+            }
+        }
+
+
+        [Authorize(Roles = "Job Seeker")]
         [HttpDelete("{seekerId}")]
 
         public async Task<IActionResult> DeleteProfile(int seekerId)
@@ -52,7 +99,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-        [Authorize(Roles = "Employer,Job Seeker,Admin")]
+        [Authorize(Roles = "Job Seeker")]
         [HttpGet("{seekerId}")]
         public async Task<IActionResult> ViewProfile(int seekerId)
         {
@@ -67,7 +114,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-       // [Authorize(Roles = "Job Seeker")]
+        [Authorize(Roles = "Job Seeker")]
         [HttpGet("search")]
         public async Task<IActionResult> SearchJobPosts([FromQuery] string? jobTitle)
         {
@@ -86,7 +133,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-        // [Authorize(Roles = "Job Seeker")]
+        [Authorize(Roles = "Job Seeker")]
         [HttpGet("filter")]
         public async Task<IActionResult> JobPostFilter([FromQuery] string? jobTitle,[FromQuery] string? industry, [FromQuery] string? requirements, [FromQuery] string? location, [FromQuery] EmploymentType? employmentType)
         {
@@ -127,6 +174,7 @@ namespace TalentTrail.Controllers
             }
         }
 
+        [Authorize(Roles = "Job Seeker")]
         [HttpGet("appliedJobs")]
         public async Task<IActionResult> GetAppliedJobs([FromQuery] int seekerId)
         {

@@ -5,6 +5,7 @@ using TalentTrail.Models;
 public interface IJobSeekerService
 {
     public Task<JobSeeker> CreateProfile(JobSeeker jobSeeker, List<string> resumePaths, List<EducationDto> educations, List<CertificationDto> certifications);
+    public Task<JobSeeker> UpdateProfile(int seekerId, JobSeeker updatedJobSeeker, List<EducationUpdateDto> educations, List<CertificationUpdateDto> certifications);
     public Task<JobSeekerProfileDto> ViewProfile(int seekerId);
     public Task DeleteProfile(int seekerId);
     public Task<List<JobPostDto>> SearchJobPosts(string? jobTitle);
