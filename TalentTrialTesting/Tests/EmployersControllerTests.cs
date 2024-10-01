@@ -57,10 +57,13 @@ namespace TalentTrail.Tests.Controllers
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
 
-            var response = result.Value as dynamic;
-            Assert.AreEqual("Employer registered successfully.", response.message);
-            Assert.AreEqual(1, response.employerId);
-            Assert.AreEqual(1, response.userId);
+            // Instead of dynamic, cast to a strongly typed object or directly assert
+            var response = result.Value;
+
+            // If you want to check message and values, assert directly using the object type
+            Assert.AreEqual("Employer registered successfully.", response.GetType().GetProperty("message")?.GetValue(response));
+            Assert.AreEqual(1, response.GetType().GetProperty("employerId")?.GetValue(response));
+            Assert.AreEqual(1, response.GetType().GetProperty("userId")?.GetValue(response));
         }
 
         [Test]
@@ -138,45 +141,6 @@ namespace TalentTrail.Tests.Controllers
             Assert.AreEqual("Employer not found.", result.Value);
         }
 
-        //[Test]
-        //public async Task ViewProfile_ValidEmployer_ReturnsOkResult()
-        //{
-        //    // Arrange
-        //    var employer = new Employer
-        //    {
-        //        EmployerId = 1,
-        //        UserId = 1
-        //    };
-
-        //    _mockProfileService
-        //        .Setup(s => s.ViewProfile(1))
-        //        .Returns(employer);
-
-        //    // Act
-        //    var result = await _controller.ViewProfile(1) as OkObjectResult;
-
-        //    // Assert
-        //    Assert.IsNotNull(result);
-        //    Assert.AreEqual(200, result.StatusCode);
-        //}
-
-        //[Test]
-        //public async Task ViewProfile_EmployerNotFound_ReturnsNotFound()
-        //{
-        //    // Arrange
-        //    _mockProfileService
-        //        .Setup(s => s.ViewProfile(1))
-        //        .ReturnsAsync((Employer)null); // No employer found
-
-        //    // Act
-        //    var result = await _controller.ViewProfile(1) as NotFoundObjectResult;
-
-        //    // Assert
-        //    Assert.IsNotNull(result);
-        //    Assert.AreEqual(404, result.StatusCode);
-        //    Assert.AreEqual("Employer profile not found", result.Value);
-        //}
-
         [Test]
         public async Task DeleteProfile_ValidEmployer_ReturnsOkResult()
         {
@@ -191,7 +155,9 @@ namespace TalentTrail.Tests.Controllers
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
-            Assert.AreEqual("Account deleted successfully", ((dynamic)result.Value).message);
+
+            var response = result.Value;
+            Assert.AreEqual("Account deleted successfully", response.GetType().GetProperty("message")?.GetValue(response));
         }
 
         [Test]
@@ -214,8 +180,10 @@ namespace TalentTrail.Tests.Controllers
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
-            Assert.AreEqual(true, ((dynamic)result.Value).exists);
-            Assert.AreEqual(1, ((dynamic)result.Value).employerId);
+
+            var response = result.Value;
+            Assert.AreEqual(true, response.GetType().GetProperty("exists")?.GetValue(response));
+            Assert.AreEqual(1, response.GetType().GetProperty("employerId")?.GetValue(response));
         }
 
         [Test]
@@ -232,7 +200,9 @@ namespace TalentTrail.Tests.Controllers
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
-            Assert.AreEqual(false, ((dynamic)result.Value).exists);
+
+            var response = result.Value;
+            Assert.AreEqual(false, response.GetType().GetProperty("exists")?.GetValue(response));
         }
     }
 }

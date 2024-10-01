@@ -56,11 +56,11 @@ public class UsersControllerTests
         _userServiceMock.Setup(s => s.DeleteUser(It.IsAny<int>())).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _usersController.DeleteUser(userId);
+        var result = await _usersController.DeleteUser(userId) as OkObjectResult;
 
         // Assert
-        Assert.IsInstanceOf<OkObjectResult>(result);
-        Assert.AreEqual("User deleted successfully.", ((OkObjectResult)result).Value);
+        Assert.IsNotNull(result);
+        Assert.AreEqual("User deleted successfully.", result.Value?.GetType().GetProperty("message")?.GetValue(result.Value));
     }
 
     [Test]
@@ -71,9 +71,10 @@ public class UsersControllerTests
         _userServiceMock.Setup(s => s.UpdateUserDetails(user)).ReturnsAsync(user);
 
         // Act
-        var result = await _usersController.UpdateUserDetails(1, user);
+        var result = await _usersController.UpdateUserDetails(1, user) as OkObjectResult;
 
         // Assert
-        Assert.IsInstanceOf<OkObjectResult>(result);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(user, result.Value);
     }
 }
