@@ -82,6 +82,106 @@ namespace TalentTrail.Services
             return jobSeeker;
         }
 
+
+        public async Task<JobSeeker> UpdateProfile(int seekerId, JobSeeker updatedJobSeeker,List<EducationUpdateDto> educations, List<CertificationUpdateDto> certifications)
+        {
+            var existingJobSeeker = await _dbContext.JobSeekers
+                .Include(js => js.Educations)
+                .Include(js => js.Certifications)
+                .Include(js => js.User) 
+                .FirstOrDefaultAsync(js => js.SeekerId == seekerId);
+
+            if (existingJobSeeker == null)
+            {
+                throw new ArgumentException("Invalid Seeker ID.");
+            }
+
+            var existingUser = await _dbContext.Users.FindAsync(existingJobSeeker.UserId);
+            if (existingUser == null)
+            {
+                throw new ArgumentException("Invalid User ID.");
+            }
+
+
+            existingJobSeeker.PhoneNumber = updatedJobSeeker.PhoneNumber;
+            existingJobSeeker.ProfileSummary = updatedJobSeeker.ProfileSummary;
+            existingJobSeeker.Experience = updatedJobSeeker.Experience;
+            existingJobSeeker.Skills = updatedJobSeeker.Skills;
+            existingJobSeeker.LanguagesKnown = updatedJobSeeker.LanguagesKnown;
+            existingJobSeeker.LastUpdatedAt = DateTime.UtcNow;
+
+            existingUser.FirstName = updatedJobSeeker.User.FirstName;
+            existingUser.LastName = updatedJobSeeker.User.LastName;
+            existingUser.Email = updatedJobSeeker.User.Email;
+
+            foreach (var education in educations)
+            {
+                var existingEducation = existingJobSeeker.Educations
+                    .FirstOrDefault(e => e.EducationId == education.EducationId);
+
+                if (existingEducation != null)
+                {
+                    existingEducation.Degree = education.Degree;
+                    existingEducation.Institution = education.Institution;
+                    existingEducation.PassoutYear = education.PassOutYear;
+                }
+                else
+                {
+                    var newEducation = new Education
+                    {
+                        Degree = education.Degree,
+                        Institution = education.Institution,
+                        PassoutYear = education.PassOutYear,
+                        SeekerId = seekerId
+                    };
+                    _dbContext.Educations.Add(newEducation);
+                }
+            }
+
+            foreach (var certification in certifications)
+            {
+                var existingCertification = existingJobSeeker.Certifications
+                    .FirstOrDefault(c => c.CertificationId == certification.CertificationId);
+
+                if (existingCertification != null)
+                {
+                    existingCertification.CertificationName = certification.CertificationName;
+                    existingCertification.CertificateImagePath = certification.CertificatePicturePath;
+                    existingCertification.DateIssued = certification.DateIssued;
+                }
+                else
+                {
+                    var newCertification = new Certification
+                    {
+                        CertificationName = certification.CertificationName,
+                        CertificateImagePath = certification.CertificatePicturePath,
+                        DateIssued = certification.DateIssued,
+                        SeekerId = seekerId
+                    };
+                    _dbContext.Certifications.Add(newCertification);
+                }
+            }
+
+            await _dbContext.SaveChangesAsync();
+
+            var subject = "Profile Update - Talent Trail";
+            var body = $"Hello {existingUser.FirstName},\n\nYour profile has been updated successfully.";
+
+            try
+            {
+                await _emailService.SendEmailAsync(existingUser.Email, subject, body);
+            }
+            catch (Exception)
+            {
+             
+            }
+
+            return existingJobSeeker;
+        }
+
+
+
+
         public async Task<JobSeekerProfileDto> ViewProfile(int seekerId)
         {
             var jobSeeker = await _dbContext.JobSeekers

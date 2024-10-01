@@ -19,6 +19,7 @@ namespace TalentTrail.Controllers
             _profileService = profileService;
         }
 
+        [Authorize(Roles = "Employer")]
         [HttpPost]
         public async Task<IActionResult> CreateProfile([FromBody] EmployerCreateDto employerCreateDto)
         {
@@ -54,7 +55,52 @@ namespace TalentTrail.Controllers
             }
         }
 
-        [Authorize(Roles = "Employer,Job Seeker,Admin")]
+
+        [Authorize(Roles = "Employer")]
+        [HttpPut("{employerId}")]
+        public async Task<IActionResult> UpdateProfile(int employerId, [FromBody] EmployerUpdateDto employerDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var updatedEmployer = new Employer
+                {
+                    JobPosition = employerDto.JobPosition,
+                    IsThirdParty = employerDto.IsThirdParty,
+                    CompanyId = employerDto.CompanyId,
+                    Users = new Users
+                    {
+                        FirstName = employerDto.FirstName,
+                        LastName = employerDto.LastName,
+                        Email = employerDto.Email
+                    }
+                };
+
+                var result = await _profileService.UpdateProfile(employerId, updatedEmployer);
+
+                if (result == null)
+                {
+                    return NotFound("Employer not found.");
+                }
+
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        [Authorize(Roles = "Employer")]
         [HttpGet("{id}")]
         public async Task<IActionResult> ViewProfile(int id)
         {
@@ -80,7 +126,7 @@ namespace TalentTrail.Controllers
             try
             {
                 await _profileService.DeleteProfile(id);
-                return Ok(new { message = "Profile deleted successfully" });
+                return Ok(new { message = "Account deleted successfully" });
             }
             catch (Exception ex)
             {

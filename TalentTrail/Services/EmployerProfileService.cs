@@ -54,6 +54,58 @@ namespace TalentTrail.Services
             return employer;
         }
 
+        public async Task<Employer> UpdateProfile(int employerId, Employer updatedEmployer)
+        {
+            var existingEmployer = await _dbContext.Employers
+                .Include(e => e.CompanyDetails)
+                .FirstOrDefaultAsync(e => e.EmployerId == employerId);
+
+            if (existingEmployer == null)
+            {
+                throw new ArgumentException("Invalid Employer ID.");
+            }
+
+            var existingUser = await _dbContext.Users.FindAsync(existingEmployer.UserId);
+            if (existingUser == null)
+            {
+                throw new ArgumentException("Invalid User ID.");
+            }
+
+            existingEmployer.JobPosition = updatedEmployer.JobPosition;
+            existingEmployer.IsThirdParty = updatedEmployer.IsThirdParty;
+
+            var selectedCompany = await _dbContext.CompanyDetails
+                .FirstOrDefaultAsync(c => c.CompanyId == updatedEmployer.CompanyId);
+
+            if (selectedCompany == null)
+            {
+                throw new ArgumentException("Invalid Company ID.");
+            }
+
+            existingEmployer.CompanyId = selectedCompany.CompanyId;
+
+            existingUser.FirstName = updatedEmployer.Users.FirstName;
+            existingUser.LastName = updatedEmployer.Users.LastName;
+            existingUser.Email = updatedEmployer.Users.Email;
+
+            await _dbContext.SaveChangesAsync();
+
+            var subject = "Profile Update - Talent Trail";
+            var body = $"Hello {existingUser.FirstName},\n\nYour employer profile and user details have been updated successfully.";
+
+            try
+            {
+                await _emailService.SendEmailAsync(existingUser.Email, subject, body);
+            }
+            catch (Exception)
+            {
+              
+            }
+
+            return existingEmployer;
+        }
+
+
         public async Task<EmployerProfileDto> ViewProfile(int employerId)
         {
             var employer = await _dbContext.Employers

@@ -19,7 +19,7 @@ namespace TalentTrail.Controllers
             _jobPostService = jobPostService;
         }
 
-        //[Authorize(Roles = "Employer")]
+        [Authorize(Roles = "Employer")]
         [HttpPost]
         public async Task<IActionResult> CreateJobPost([FromBody] JobPost jobPost)
         {
@@ -32,7 +32,7 @@ namespace TalentTrail.Controllers
             return Ok(new { message = "Job post created successfully.", jobId = createdJobPost.JobId });
         }
 
-        //[Authorize(Roles = "Employer")]
+        [Authorize(Roles = "Employer")]
         [HttpPut("{jobId}")]
         public async Task<IActionResult> UpdateJobPost(int jobId, [FromBody] JobPost jobPost)
         {
@@ -52,7 +52,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-        //[Authorize(Roles = "Employer,Job Seeker")]
+        [Authorize(Roles = "Employer,Job Seeker")]
         [HttpGet("jobId/{jobId}")]
         public async Task<IActionResult> GetJobPostById(int jobId)
         {
@@ -75,7 +75,7 @@ namespace TalentTrail.Controllers
             return Ok(jobPosts);
         }
 
-        //[Authorize(Roles = "Employer,Job Seeker")]
+        [Authorize(Roles = "Employer,Job Seeker")]
         [HttpGet("getJobPostByEmpId/{employerId}")]
 
         public async Task<IActionResult> GetJobPostsByEmployerId(int employerId)
@@ -97,7 +97,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-       // [Authorize(Roles = "Employer")]
+        [Authorize(Roles = "Employer")]
         [HttpDelete("{jobId}")]
         public async Task<IActionResult> DeleteJobPost(int jobId)
         {
@@ -112,7 +112,7 @@ namespace TalentTrail.Controllers
             }
         }
 
-      //  [Authorize(Roles = "Employer")]
+        [Authorize(Roles = "Employer")]
         [HttpPut("UpdateApplicationStatus")]
         public async Task<IActionResult> UpdateApplicationStatus([FromBody] UpdateApplicationStatusDto updateDto)
         {
