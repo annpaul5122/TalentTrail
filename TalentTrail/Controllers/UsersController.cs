@@ -23,16 +23,16 @@ namespace TalentTrail.Controllers
         }
 
         [HttpPost("request-password-reset")]
-        public async Task<IActionResult> RequestPasswordReset([FromQuery] int userId)
+        public async Task<IActionResult> RequestPasswordReset([FromBody] EmailRequest emailRequest)
         {
-            await _userService.SendPasswordResetEmail(userId);
+            await _userService.SendPasswordResetEmail(emailRequest.Email);
             return Ok("Password reset email sent.");
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword(string token, [FromQuery] string newPassword)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPassword reset)
         {
-            await _userService.ResetPassword(token, newPassword);
+            await _userService.ResetPassword(reset.token,reset.newPassword,reset.confirmPassword);
             return Ok("Password has been reset.");
         }
 

@@ -33,7 +33,17 @@ namespace TalentTrail.Services
                 throw new ArgumentException("Job post not found.");
             }
 
-            jobPost.CompanyId = updatedJobPost.CompanyId;
+            if (updatedJobPost.CompanyId != jobPost.CompanyId)
+            {
+                var companyExists = await _context.CompanyDetails.AnyAsync(cd => cd.CompanyId == updatedJobPost.CompanyId);
+                if (!companyExists)
+                {
+                    throw new ArgumentException("Invalid CompanyId.");
+                }
+
+                jobPost.CompanyId = updatedJobPost.CompanyId;
+            }
+
             jobPost.JobTitle = updatedJobPost.JobTitle;
             jobPost.JobDescription = updatedJobPost.JobDescription;
             jobPost.JobRequirements = updatedJobPost.JobRequirements;
@@ -41,7 +51,7 @@ namespace TalentTrail.Services
             jobPost.SalaryRange = updatedJobPost.SalaryRange;
             jobPost.EmploymentType = updatedJobPost.EmploymentType;
             jobPost.Industry = updatedJobPost.Industry;
-            jobPost.ApplicationDeadline = updatedJobPost.ApplicationDeadline.Date;
+            jobPost.ApplicationDeadline = updatedJobPost.ApplicationDeadline;
             jobPost.UpdatedAt = DateTime.Now;
 
             _context.JobPosts.Update(jobPost);

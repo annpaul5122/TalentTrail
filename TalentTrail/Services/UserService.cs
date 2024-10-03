@@ -19,9 +19,9 @@ namespace TalentTrail.Services
 
         }
 
-        public async Task SendPasswordResetEmail(int userId)
+        public async Task SendPasswordResetEmail(string email)
         {
-            var user = await _dbContext.Users.FindAsync(userId);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
             if (user == null)
             {
                 throw new ArgumentException("User not found.");
@@ -39,26 +39,32 @@ namespace TalentTrail.Services
             await _dbContext.SaveChangesAsync();
 
             // Send email
-            var resetLink = $"https://localhost:7119/api/Users/reset-password?token={token}"; // Adjust URL as needed
+            var resetLink = $"http://localhost:3000/reset-password?token={token}"; // Adjust URL as needed
             var subject = "Password Reset Request";
             var body = $"Please reset your password by clicking on the following link: <a href='{resetLink}'>Reset Password</a>";
 
             await _emailService.SendEmailAsync(user.Email, subject, body);
         }
 
-        public async Task ResetPassword(string token, string newPassword)
+        public async Task ResetPassword(string token, string newPassword,string confirmPwd)
         {
             var user = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.PasswordResetToken == token && u.PasswordResetTokenExpiry > DateTime.UtcNow);
+          .FirstOrDefaultAsync(u => u.PasswordResetToken == token && u.PasswordResetTokenExpiry > DateTime.UtcNow);
 
             if (user == null)
             {
                 throw new ArgumentException("Invalid or expired token.");
             }
 
-            user.Password = newPassword;
-            user.PasswordResetToken = null;
+            if (newPassword != confirmPwd)
+            {
+                throw new ArgumentException("New password and confirmation do not match.");
+            }
+
+            user.Password = newPassword; 
+            user.PasswordResetToken = null; 
             user.PasswordResetTokenExpiry = null;
+
             await _dbContext.SaveChangesAsync();
         }
 
