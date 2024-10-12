@@ -1,4 +1,6 @@
 
+using log4net;
+using log4net.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -108,6 +110,9 @@ namespace TalentTrail
 
             builder.Services.AddDbContext<TalentTrailDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("conStr")));
+
+            var logRepository = LogManager.GetRepository(System.Reflection.Assembly.GetEntryAssembly());
+            XmlConfigurator.Configure(logRepository,new FileInfo("log4net.config"));
 
 
             
