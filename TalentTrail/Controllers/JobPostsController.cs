@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using log4net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TalentTrail.Dto;
@@ -12,6 +13,7 @@ namespace TalentTrail.Controllers
     [ApiController]
     public class JobPostsController : ControllerBase
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(JobPostsController));
         private readonly IJobPostService _jobPostService;
 
         public JobPostsController(IJobPostService jobPostService)
@@ -29,6 +31,7 @@ namespace TalentTrail.Controllers
             }
 
             var createdJobPost = await _jobPostService.CreateJobPost(jobPost);
+            log.Info($"Job Post {createdJobPost.JobId} has been created");
             return Ok(new { message = "Job post created successfully.", jobId = createdJobPost.JobId });
         }
 
@@ -44,6 +47,7 @@ namespace TalentTrail.Controllers
             try
             {
                 var updatedJobPost = await _jobPostService.UpdateJobPost(jobId, jobPost);
+                log.Info($"Job Post {jobId} updated successfully.");
                 return Ok(new { message = "Job post updated successfully.", jobId = updatedJobPost.JobId });
             }
             catch (Exception ex)
@@ -104,10 +108,12 @@ namespace TalentTrail.Controllers
             try
             {
                 await _jobPostService.DeleteJobPost(jobId);
+                log.Info($"Job post {jobId} deleted successfully.");
                 return Ok(new { message = "Job post deleted successfully." });
             }
             catch (Exception ex)
             {
+                log.Error("An error occurred while deleting the job post : ", ex);
                 return NotFound(new { message = ex.Message });
             }
         }
@@ -119,10 +125,12 @@ namespace TalentTrail.Controllers
             try
             {
                 await _jobPostService.UpdateApplicationStatus(updateDto.ApplicationId, updateDto.NewStatus);
+                log.Info($"Application status of {updateDto.ApplicationId} updated successfully.");
                 return Ok("Application status updated successfully.");
             }
             catch (Exception ex)
             {
+                log.Error("An error occurred while updating the status of application : ", ex);
                 return NotFound(ex.Message);
             }
         }

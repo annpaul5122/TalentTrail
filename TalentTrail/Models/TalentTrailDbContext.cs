@@ -10,7 +10,7 @@ namespace TalentTrail.Models
             
         }
 
-        public virtual DbSet<Users> Users { get; set; }
+        public DbSet<Users> Users { get; set; }
         public DbSet<Employer> Employers { get; set; }
         public DbSet<JobSeeker> JobSeekers { get; set; }
         public DbSet<JobPost> JobPosts { get; set; }

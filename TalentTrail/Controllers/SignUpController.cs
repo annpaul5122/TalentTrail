@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using log4net;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TalentTrail.Dto;
 using TalentTrail.Enum;
@@ -11,6 +12,7 @@ namespace TalentTrail.Controllers
     [ApiController]
     public class SignUpController : ControllerBase
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(SignUpController));
         private ISignUpService _signUpService;
         public SignUpController(ISignUpService signUpService)
         {
@@ -34,10 +36,12 @@ namespace TalentTrail.Controllers
                 };
 
                 var registeredUser = await _signUpService.SignUpUserAsync(user);
+                log.Info("Employer account registered successfully.");
                 return Ok(new { message = "Employer registered successfully.", userId = registeredUser.UserId });
             }
             catch (Exception ex)
             {
+                log.Error("Error occurred while creating Employer account : ", ex);
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -58,10 +62,12 @@ namespace TalentTrail.Controllers
                 };
 
                 var registeredUser = await _signUpService.SignUpUserAsync(user);
+                log.Info("Jobseeker account registered successfully.");
                 return Ok(new { message = "Job Seeker registered successfully.", userId = registeredUser.UserId });
             }
             catch (Exception ex)
             {
+                log.Error("Error occurred while creating Jobseeker account : ", ex);
                 return BadRequest(new { message = ex.Message });
             }
         }

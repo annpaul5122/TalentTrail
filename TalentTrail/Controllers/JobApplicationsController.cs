@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using log4net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TalentTrail.Dto;
@@ -10,6 +11,7 @@ namespace TalentTrail.Controllers
     [ApiController]
     public class JobApplicationsController : ControllerBase
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(JobApplicationsController));
         private readonly IJobApplicationService _jobApplicationService;
         public JobApplicationsController(IJobApplicationService jobApplicationService)
         {
@@ -28,10 +30,12 @@ namespace TalentTrail.Controllers
             try
             {
                 var jobApplication = await _jobApplicationService.CreateJobApplication(applyJobDto);
+                log.Info($"Job application {jobApplication.ApplicationId} created successfully.");
                 return Ok(new { message = "Job Application created successfully.", applicationId = jobApplication.ApplicationId });
             }
             catch (Exception ex)
             {
+                log.Warn("Error occured while creating job application : ",ex);
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -88,6 +92,7 @@ namespace TalentTrail.Controllers
             try
             {
                 await _jobApplicationService.DeleteJobApplication(id);
+                log.Info($"Job Application {id} deleted successfully.");
                 return NoContent();
             }
             catch (ArgumentException ex)
@@ -96,6 +101,7 @@ namespace TalentTrail.Controllers
             }
             catch (Exception ex)
             {
+                log.Error("Error occured while deleting job application : ", ex);
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -112,10 +118,12 @@ namespace TalentTrail.Controllers
             try
             {
                 await _jobApplicationService.UpdateJobApplication(applyJobDto);
+                log.Info("Job Application updated successfully.");
                 return NoContent();
             }
             catch (Exception ex)
             {
+                log.Error("Error occured while updating job application : ", ex);
                 return BadRequest(new { message = ex.Message });
             }
         }

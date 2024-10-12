@@ -5,6 +5,7 @@ using TalentTrail.Controllers;
 using TalentTrail.Services;
 using TalentTrail.Models;
 using Microsoft.AspNetCore.Mvc;
+using TalentTrail.Dto;
 
 [TestFixture]
 public class UsersControllerTests
@@ -23,10 +24,13 @@ public class UsersControllerTests
     public async Task RequestPasswordReset_ReturnsOk_WhenCalled()
     {
         // Arrange
-        int userId = 1;
+        var emailRequest = new EmailRequest
+        {
+            Email = "someemail@gmail.com"
+        };
 
         // Act
-        var result = await _usersController.RequestPasswordReset(userId);
+        var result = await _usersController.RequestPasswordReset(emailRequest);
 
         // Assert
         Assert.IsInstanceOf<OkObjectResult>(result);
@@ -37,11 +41,15 @@ public class UsersControllerTests
     public async Task ResetPassword_ReturnsOk_WhenCalled()
     {
         // Arrange
-        string token = "some-token";
-        string newPassword = "new-password";
+        var resetPasswordRequest = new ResetPassword
+        {
+            token = "some-token",
+            newPassword = "new-password",
+            confirmPassword = "new-password"
+        };
 
         // Act
-        var result = await _usersController.ResetPassword(token, newPassword);
+        var result = await _usersController.ResetPassword(resetPasswordRequest);
 
         // Assert
         Assert.IsInstanceOf<OkObjectResult>(result);

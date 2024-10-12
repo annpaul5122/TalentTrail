@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using log4net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ namespace TalentTrail.Controllers
     [ApiController]
     public class JobSeekersController : ControllerBase
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(JobSeekersController));
         private readonly IJobSeekerService _jobSeekerService;
         public JobSeekersController(IJobSeekerService jobSeekerService)
         {
@@ -25,6 +27,7 @@ namespace TalentTrail.Controllers
             try
             {
                 var createdJobSeeker = await _jobSeekerService.CreateProfile(profileDto.JobSeeker,profileDto.ResumePaths,profileDto.Educations,profileDto.Certifications);
+                log.Info($"Jobseeker profile {profileDto.JobSeeker.SeekerId} created successfully.");
                 return Ok(createdJobSeeker);
             }
             catch (DbUpdateException dbEx)
@@ -33,6 +36,7 @@ namespace TalentTrail.Controllers
             }
             catch (Exception ex)
             {
+                log.Error("Error occurred while creating job seeker profile : ", ex);
                 return BadRequest(ex.Message);
             }
         }
@@ -69,7 +73,7 @@ namespace TalentTrail.Controllers
                     request.Educations,
                     request.Certifications
                 );
-
+                log.Info($"Jobseeker profile {seekerId} updated successfully.");
                 return Ok(updatedJobSeekerProfile);
             }
             catch (ArgumentException ex)
@@ -78,6 +82,7 @@ namespace TalentTrail.Controllers
             }
             catch (Exception ex)
             {
+                log.Error("Error occurred while updating the jobseeker profile : ", ex);
                 return StatusCode(500, "An error occurred while updating the profile. Please try again later.");
             }
         }
@@ -91,10 +96,12 @@ namespace TalentTrail.Controllers
             try
             {
                 await _jobSeekerService.DeleteProfile(seekerId);
+                log.Info($"Jobseeker profile {seekerId} deleted successfully.");
                 return Ok(new { message = "Job Seeker profile deleted successfully." });
             }
             catch (Exception ex)
             {
+                log.Error("Error occurred while deleting the jobseeker profile : ", ex);
                 return NotFound(new { message = ex.Message });
             }
         }
@@ -106,10 +113,12 @@ namespace TalentTrail.Controllers
             try
             {
                 var profileDto = await _jobSeekerService.ViewProfile(seekerId);
+                log.Info($"Jobseeker profile {seekerId} retrieved successfully.");
                 return Ok(profileDto);
             }
             catch (Exception ex)
             {
+                log.Error("Error occurred while displaying the jobseeker profile : ", ex);
                 return NotFound(new { message = ex.Message });
             }
         }
@@ -125,10 +134,12 @@ namespace TalentTrail.Controllers
                 {
                     return NotFound("No job posts found with the given criteria.");
                 }
+                log.Info($"Job Posts retrieved successfully based on the job title : {jobTitle}");
                 return Ok(jobPosts);
             }
             catch (Exception ex)
             {
+                log.Error("Error occurred while fetching job posts based on the search request", ex);
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -144,10 +155,12 @@ namespace TalentTrail.Controllers
                 {
                     return NotFound("No job posts found with the given criteria.");
                 }
+                log.Info("Job Posts retrieved successfully based on the filters.");
                 return Ok(jobPosts);
             }
             catch (Exception ex)
             {
+                log.Error("Error occurred while fetching job posts based on the filters", ex);
                 return BadRequest(new { message = ex.Message });
             }
         }
