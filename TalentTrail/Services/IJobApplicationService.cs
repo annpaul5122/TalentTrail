@@ -11,5 +11,6 @@ namespace TalentTrail.Services
         public Task<List<JobApplicationDto>> GetAllJobApplicationsByJobPosts(int jobId);
         public Task UpdateJobApplication(ApplyJobDto applyJobDto);
         public Task DeleteJobApplication(int id);
+        public Task<byte[]> GenerateApplicantPdfAsync(int applicationId);
     }
 }

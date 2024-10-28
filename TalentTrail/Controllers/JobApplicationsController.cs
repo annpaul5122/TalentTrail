@@ -127,5 +127,20 @@ namespace TalentTrail.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [Authorize(Roles = "Employer")]
+        [HttpGet("DownloadApplicantPDF/{applicationId}")]
+        public async Task<IActionResult> DownloadApplicantPDF(int applicationId)
+        {
+            try
+            {
+                var pdfBytes = await _jobApplicationService.GenerateApplicantPdfAsync(applicationId);
+                return File(pdfBytes, "application/pdf", $"Applicant_Profile_{applicationId}.pdf");
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Applicant not found.");
+            }
+        }
     }
 }
