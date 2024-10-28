@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Tls;
+using PdfSharpCore.Drawing;
+using PdfSharpCore.Pdf;
 using TalentTrail.Dto;
 using TalentTrail.Enum;
 using TalentTrail.Models;
@@ -10,11 +13,12 @@ namespace TalentTrail.Services
     public class JobApplicationService : IJobApplicationService
     {
         private readonly TalentTrailDbContext _dbContext;
-     
+        private readonly IWebHostEnvironment _env;
 
-        public JobApplicationService(TalentTrailDbContext dbContext)
+        public JobApplicationService(TalentTrailDbContext dbContext, IWebHostEnvironment env)
         {
             _dbContext = dbContext;
+            _env = env;
         }
 
         public async Task<JobApplication> CreateJobApplication(ApplyJobDto applyJobDto)
@@ -171,6 +175,133 @@ namespace TalentTrail.Services
 
             _dbContext.JobApplications.Update(jobApplication);
             await _dbContext.SaveChangesAsync();
+        }
+
+        private double DrawWrappedText(XGraphics gfx, string text, XFont font, XBrush brush, double xPosition, double yPosition, double maxWidth, double lineHeight)
+        {
+            string[] words = text.Split(' ');
+            string line = "";
+
+            foreach (var word in words)
+            {
+                string testLine = string.IsNullOrEmpty(line) ? word : line + " " + word;
+                XSize size = gfx.MeasureString(testLine, font);
+
+                if (size.Width > maxWidth)
+                {
+                    gfx.DrawString(line, font, brush, new XPoint(xPosition, yPosition));
+                    yPosition += lineHeight;
+                    line = word;
+                }
+                else
+                {
+                    line = testLine;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(line))
+            {
+                gfx.DrawString(line, font, brush, new XPoint(xPosition, yPosition));
+                yPosition += lineHeight;
+            }
+
+            return yPosition;
+        }
+        public async Task<byte[]> GenerateApplicantPdfAsync(int applicationId)
+        {
+            // Fetch the applicant's data
+            var applicant = await _dbContext.JobApplications
+                 .Include(ja => ja.jobSeeker)
+               .Include(ja => ja.jobSeeker.User)
+               .SingleOrDefaultAsync(ja => ja.ApplicationId == applicationId);
+
+            if (applicant == null)
+            {
+                throw new KeyNotFoundException("Applicant not found.");
+            }
+
+            // Create a PDF document
+            using (var memoryStream = new MemoryStream())
+            {
+                PdfDocument pdf = new PdfDocument();
+                var SeekerName = applicant.jobSeeker.User.FirstName + " " + applicant.jobSeeker.User.LastName;
+                pdf.Info.Title = $"{SeekerName}_Profile";
+                string logoPath = Path.Combine(_env.WebRootPath, "images", "logo-trail1.png");
+
+                // Create a new page and write applicant data
+                PdfPage page = pdf.AddPage();
+                XGraphics gfx = XGraphics.FromPdfPage(page);
+
+                XFont fontRegular = new XFont("Verdana", 12, XFontStyle.Regular);
+                XFont fontBold = new XFont("Verdana", 12, XFontStyle.Bold);
+
+                double yPosition = 60;
+                double lineHeight = 20; // Distance between each line
+                double pageWidth = page.Width - 80; // Page width minus margins
+
+                if (File.Exists(logoPath))
+                {
+                    XImage logo = XImage.FromFile(logoPath);
+                    gfx.DrawImage(logo, 30, 20, 150, 70);
+                }
+
+                XPen borderPen = new XPen(XColors.Black, 1);
+                gfx.DrawRectangle(borderPen, 20, 20, page.Width - 40, page.Height - 40);
+
+               
+                yPosition += 60;
+
+                // Draw the Applicant Name heading and content
+                gfx.DrawString("Applicant Name:", fontBold, XBrushes.Black, new XPoint(40, yPosition));
+                double applicantNameWidth = gfx.MeasureString("Applicant Name:", fontBold).Width;
+                gfx.DrawString($"{applicant.jobSeeker.User.FirstName} {applicant.jobSeeker.User.LastName}", fontRegular, XBrushes.Black, new XPoint(40 + applicantNameWidth + 10, yPosition)); // Adding spacing
+                yPosition += lineHeight;
+                yPosition += lineHeight;
+
+                // Draw the Email heading and content
+                gfx.DrawString("Email:", fontBold, XBrushes.Black, new XPoint(40, yPosition));
+                double emailWidth = gfx.MeasureString("Email:", fontBold).Width;
+                gfx.DrawString(applicant.jobSeeker.User.Email, fontRegular, XBrushes.Black, new XPoint(40 + emailWidth + 10, yPosition)); // Adding spacing
+                yPosition += lineHeight;
+                yPosition += lineHeight;
+
+                // Draw the Contact Details heading and content
+                gfx.DrawString("Contact Details:", fontBold, XBrushes.Black, new XPoint(40, yPosition));
+                double contactDetailsWidth = gfx.MeasureString("Contact Details:", fontBold).Width;
+                gfx.DrawString(applicant.jobSeeker.PhoneNumber, fontRegular, XBrushes.Black, new XPoint(40 + contactDetailsWidth + 10, yPosition)); // Adding spacing
+                yPosition += lineHeight;
+                yPosition += lineHeight;
+
+                // Draw Profile Summary heading and content (without spacing adjustment)
+                gfx.DrawString("Profile Summary:", fontBold, XBrushes.Black, new XPoint(40, yPosition));
+                yPosition += lineHeight;
+                yPosition += lineHeight;
+                yPosition = DrawWrappedText(gfx, applicant.jobSeeker.ProfileSummary, fontRegular, XBrushes.Black, 40, yPosition, pageWidth, lineHeight);
+                yPosition += lineHeight;
+
+                // Draw Cover Letter heading and content (without spacing adjustment)
+                gfx.DrawString("Cover Letter:", fontBold, XBrushes.Black, new XPoint(40, yPosition));
+                yPosition += lineHeight;
+                yPosition += lineHeight;
+                yPosition = DrawWrappedText(gfx, applicant.CoverLetter ?? "N/A", fontRegular, XBrushes.Black, 40, yPosition, pageWidth, lineHeight);
+                yPosition += lineHeight;
+
+                // Draw Skills heading and content
+                gfx.DrawString("Skills:", fontBold, XBrushes.Black, new XPoint(40, yPosition));
+                double skillsWidth = gfx.MeasureString("Skills:", fontBold).Width;
+                gfx.DrawString(applicant.jobSeeker.Skills, fontRegular, XBrushes.Black, new XPoint(40 + skillsWidth + 10, yPosition)); // Adding spacing
+                yPosition += lineHeight;
+                yPosition += lineHeight;
+
+                // Draw Application Date heading and content
+                gfx.DrawString("Application Date:", fontBold, XBrushes.Black, new XPoint(40, yPosition));
+                double applicationDateWidth = gfx.MeasureString("Application Date:", fontBold).Width;
+                gfx.DrawString(applicant.ApplicationDate.ToString("dd/MM/yyyy"), fontRegular, XBrushes.Black, new XPoint(40 + applicationDateWidth + 10, yPosition));
+
+                // Save the PDF to memory and return it as byte array
+                pdf.Save(memoryStream, false);
+                return memoryStream.ToArray();
+            }
         }
 
     }
